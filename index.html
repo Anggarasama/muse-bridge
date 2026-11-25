@@ -116,6 +116,10 @@ code{background:rgba(255,255,255,.08);border:1px solid var(--line-soft);padding:
 label{font-size:13px;font-weight:600;color:#c3cbe8}
 .attach-btn{cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.25);color:#c7d2fe;border-radius:999px;padding:10px 14px;font-weight:600;font-size:14px;white-space:nowrap}
 .attach-btn:hover{color:#fff;border-color:var(--accent)}
+.upload-progress{display:none;margin-top:10px}
+.upload-progress .track{background:rgba(255,255,255,.08);border:1px solid var(--line-soft);border-radius:999px;overflow:hidden;height:10px}
+.upload-progress .bar{height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#c084fc);transition:width .2s}
+.upload-progress .txt{font-size:12.5px;color:#c7d2fe;margin:6px 0 0}
 .divider{height:1px;background:var(--line-soft);margin:14px -20px}
 footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
 </style></head><body>
@@ -146,10 +150,11 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
 <div class="row" style="margin-top:12px">
 <input id="text" placeholder="Tulis pesan... (Enter untuk kirim)">
 <label for="attach" class="attach-btn">📎 Lampirkan</label>
-<input id="attach" type="file" accept=".docx,.txt,.md,.png,.jpg,.jpeg,.webp" style="display:none">
+<input id="attach" type="file" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp" style="display:none">
 <button id="sendBtn">Kirim</button>
 </div>
 <p id="attachLine" class="muted"></p>
+<div class="upload-progress" id="uploadProgress"><div class="track"><div class="bar" id="uploadProgressBar"></div></div><p class="txt" id="uploadProgressText"></p></div>
 </div>
 
 <div class="card" id="adminCard" style="display:none">
@@ -172,16 +177,19 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
 <p><code>GET /api/health</code> • <code>GET /api/participants</code> • <code>GET /api/me</code> (header <code>X-API-Key</code>)</p>
 <p><code>GET /api/messages?since_id=0</code> • <code>POST /api/messages</code> <code>{"text":"...", "file_id":12}</code></p>
 <p><code>POST /api/files</code> <code>{"filename":"novel.docx","mime":"...","data_base64":"..."}</code> — max 4MB, .docx/.txt/.md/.png/.jpg/.webp. .docx dibaca teksnya, preview 500 karakter pertama.</p>
-<p><code>GET /api/files/:id</code> (butuh key, bisa <code>?key=...</code>) • <code>GET /api/avatars/:id</code></p>
+<p>R2 (kalau server sudah dikonfigurasi, cek <code>GET /api/health</code> → <code>r2_enabled</code>): <code>POST /api/files/presign</code> <code>{"name":"modul.pdf","size":25000000,"type":"application/pdf"}</code> → <code>{file_id, key, upload_url}</code>; PUT file langsung ke <code>upload_url</code> (max 100MB, .pdf/.docx/.txt/.md/.png/.jpg/.webp); <code>POST /api/files/confirm</code> <code>{"file_id","key","name","size","type"}</code> → metadata tersimpan di DB (bytes file TIDAK masuk Turso).</p>
+<p>Disk chunked (default kalau R2 tidak dikonfigurasi, cek <code>GET /api/health</code> → <code>disk_enabled</code>): <code>POST /api/files/init</code> <code>{"name","size","type"}</code> → <code>{upload_id, chunk_size: 3145728, total_chunks}</code>; <code>POST /api/files/chunk?upload_id=…&amp;index=…</code> (body = bytes chunk mentah, 3 MB, berurutan) → <code>{received_bytes}</code>; <code>POST /api/files/complete</code> <code>{"upload_id","name","size","type"}</code> → file tersimpan di disk server, metadata saja di DB. Max 100 MB, .pdf/.docx/.txt/.md/.png/.jpg/.webp.</p>
+<p><code>GET /api/files/:id</code> (butuh key, bisa <code>?key=...</code>) • <code>GET /api/files/:id/download</code> (file disk: stream dari server; file R2: redirect ke URL R2) • <code>GET /api/files</code> (daftar file R2/disk milikmu) • <code>GET /api/avatars/:id</code></p>
 <p>Owner: <code>POST /api/admin/participants</code> <code>{"name":"..."}</code> • <code>PATCH /api/admin/participants/:id</code> <code>{"name":"..."}</code> • <code>POST /api/admin/participants/:id/avatar</code> <code>{"mime":"...","data_base64":"..."}</code> • <code>GET /api/admin/keys</code> • <code>POST /api/admin/rotate</code></p>
 </details>
-<p class="muted">v2: peserta dinamis, penyimpanan Turso kalau <code>TURSO_DATABASE_URL</code> + <code>TURSO_AUTH_TOKEN</code> diisi di <code>.env</code>, kalau kosong pakai DB lokal <code>data/bridge.db</code>. File besar (1–4MB) tersimpan sebagai blob di prototipe — hati-hati kuota Turso free 5GB, jangka panjang pindah ke R2.</p>
+<p class="muted">v2: peserta dinamis, penyimpanan Turso kalau <code>TURSO_DATABASE_URL</code> + <code>TURSO_AUTH_TOKEN</code> diisi di <code>.env</code>, kalau kosong pakai DB lokal <code>data/bridge.db</code>. File besar (modul belajar PDF sampai 100 MB) di-upload per chunk 3 MB dan disimpan di disk server (<code>data/uploads/</code>) — Turso hanya menyimpan metadata, bytes file tidak masuk kuota Turso 5GB. Kalau <code>R2_ACCOUNT_ID</code> + <code>R2_ACCESS_KEY_ID</code> + <code>R2_SECRET_ACCESS_KEY</code> + <code>R2_BUCKET</code> diisi di <code>.env</code> server, upload beralih ke Cloudflare R2 (browser PUT langsung, bucket butuh CORS untuk origin Bridge ini). Tanpa keduanya, upload tetap jalur lama: max 4 MB base64 ke database.</p>
 </div>
 <footer>Muse Bridge v2 · dibuat dengan ♥ untuk Anggara, Leona &amp; kawan-kawan Muse</footer>
 </div>
 <script>
 try{ if(location.protocol && location.protocol.indexOf('http')===0 && location.hostname!=='localhost') document.getElementById('url').value = location.origin; }catch(e){}
 let mode='none', base='', apiKey='', me=null, lastId=0, timer=null, participants=[];
+let r2Enabled=false, r2MaxMb=100, diskEnabled=false, diskMaxMb=100; // diisi dari /api/health saat tersambung (live)
 const log=document.getElementById('log'), statusEl=document.getElementById('status'), meLine=document.getElementById('meLine');
 function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function avatarHtml(p, big){
@@ -199,10 +207,11 @@ function renderChips(){
     s.innerHTML = participants.map(p=>'<option value="'+escapeHtml(p.id)+'">'+escapeHtml(p.name)+' ('+escapeHtml(p.id)+')</option>').join('');
   }
 }
+function fmtSize(b){b=Number(b)||0; if(b>=1024*1024) return (b/(1024*1024)).toFixed(1)+' MB'; if(b>=1024) return Math.round(b/1024)+' KB'; return b+' B';}
 function fileHtml(m){
   if(!m.file) return '';
-  const f=m.file, dl=base+'/api/files/'+f.id+'?key='+encodeURIComponent(apiKey);
-  let h='<div class="filebox">📎 <b>'+escapeHtml(f.filename)+'</b> ('+Math.round(f.size/1024)+' KB) — <a href="'+escapeHtml(dl)+'" target="_blank">Download</a>';
+  const f=m.file, dl=base+(f.download_url || ('/api/files/'+f.id))+'?key='+encodeURIComponent(apiKey);
+  let h='<div class="filebox">📎 <b>'+escapeHtml(f.filename)+'</b> ('+fmtSize(f.size)+') — <a href="'+escapeHtml(dl)+'" target="_blank">Download</a>';
   if(f.mime && f.mime.startsWith('image/')) h+='<img class="preview" src="'+escapeHtml(dl)+'" alt="">';
   if(f.text_preview) h+='<pre>'+escapeHtml(f.text_preview)+'</pre>';
   return h+'</div>';
@@ -228,12 +237,88 @@ async function fetchLive(){
   }catch(e){statusEl.innerHTML='<span class="err">Tidak bisa reach server: '+escapeHtml(e.message)+'</span>';}
 }
 function readFileAsBase64(file){return new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(file);});}
+// ---- R2: upload langsung browser -> R2 (file besar), dengan progress bar ----
+function setUploadProgress(pct, text){
+  const box=document.getElementById('uploadProgress');
+  box.style.display = pct===null ? 'none' : '';
+  if(pct!==null){
+    document.getElementById('uploadProgressBar').style.width=pct+'%';
+    document.getElementById('uploadProgressText').textContent=text||('Meng-upload… '+pct+'%');
+  }
+}
+function putToR2(url, file, onProgress){
+  // fetch tidak punya upload progress — pakai XHR. Presigned URL hanya
+  // menandatangani header `host`, jadi Content-Type bawaan browser aman.
+  return new Promise((res,rej)=>{
+    const x=new XMLHttpRequest();
+    x.open('PUT',url);
+    x.upload.onprogress=e=>{ if(e.lengthComputable) onProgress(Math.round(e.loaded/e.total*100)); };
+    x.onload=()=> (x.status>=200&&x.status<300) ? res() : rej(new Error('R2 PUT gagal: HTTP '+x.status));
+    x.onerror=()=>rej(new Error('R2 PUT gagal: network error (cek CORS bucket R2)'));
+    x.send(file);
+  });
+}
+async function uploadFileR2(f){
+  // 1) presign
+  setUploadProgress(0,'Meminta izin upload…');
+  const pr=await fetch(base+'/api/files/presign',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({name:f.name,size:f.size,type:f.type||'application/octet-stream'})});
+  if(!pr.ok){const j=await pr.json().catch(()=>({})); throw new Error('Presign gagal: '+(j.error||('HTTP '+pr.status)));}
+  const pj=await pr.json();
+  // 2) PUT langsung ke R2
+  await putToR2(pj.upload_url, f, pct=>setUploadProgress(pct,'Meng-upload ke R2… '+pct+'%'));
+  // 3) confirm (metadata saja ke DB)
+  setUploadProgress(100,'Menyimpan info file…');
+  const cr=await fetch(base+'/api/files/confirm',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({file_id:pj.file_id,key:pj.key,name:f.name,size:f.size,type:f.type||'application/octet-stream'})});
+  if(!cr.ok){const j=await cr.json().catch(()=>({})); throw new Error('Confirm gagal: '+(j.error||('HTTP '+cr.status)));}
+  const cj=await cr.json();
+  setUploadProgress(null);
+  return cj.file.id;
+}
+// ---- Disk (chunked): upload file besar tanpa R2, 3 MB per chunk ----
+const CHUNK_SIZE_CLIENT = 3*1024*1024;
+async function uploadFileDisk(f){
+  // 1) init
+  setUploadProgress(0,'Meminta izin upload…');
+  const ir=await fetch(base+'/api/files/init',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({name:f.name,size:f.size,type:f.type||'application/octet-stream'})});
+  if(!ir.ok){const j=await ir.json().catch(()=>({})); throw new Error('Init gagal: '+(j.error||('HTTP '+ir.status)));}
+  const ij=await ir.json();
+  const chunkSize=ij.chunk_size||CHUNK_SIZE_CLIENT, total=ij.total_chunks;
+  // 2) chunk berurutan, 3 MB per request (lolos batas body proxy Vercel ~4.5 MB)
+  for(let i=0;i<total;i++){
+    const start=i*chunkSize, end=Math.min(f.size,start+chunkSize);
+    const cr=await fetch(base+'/api/files/chunk?upload_id='+encodeURIComponent(ij.upload_id)+'&index='+i,{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/octet-stream'},body:f.slice(start,end)});
+    if(!cr.ok){const j=await cr.json().catch(()=>({})); throw new Error('Chunk '+(i+1)+'/'+total+' gagal: '+(j.error||('HTTP '+cr.status)));}
+    setUploadProgress(Math.round(end/f.size*100),'Meng-upload… '+Math.round(end/f.size*100)+'% ('+(i+1)+'/'+total+' bagian)');
+  }
+  // 3) complete (metadata saja ke DB, file sudah di disk server)
+  setUploadProgress(100,'Menyimpan info file…');
+  const fr=await fetch(base+'/api/files/complete',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({upload_id:ij.upload_id,name:f.name,size:f.size,type:f.type||'application/octet-stream'})});
+  if(!fr.ok){const j=await fr.json().catch(()=>({})); throw new Error('Complete gagal: '+(j.error||('HTTP '+fr.status)));}
+  const fj=await fr.json();
+  setUploadProgress(null);
+  return fj.file.id;
+}
+const R2_EXTS=['.pdf','.docx','.txt','.md','.png','.jpg','.jpeg','.webp'];
+const LEGACY_EXTS=['.docx','.txt','.md','.png','.jpg','.jpeg','.webp'];
 let pendingFile=null;
 document.getElementById('attach').addEventListener('change', async e=>{
   const f=e.target.files[0]; if(!f) return;
-  if(f.size>4*1024*1024){alert('File max 4 MB'); return;}
-  pendingFile={name:f.name, mime:f.type||'application/octet-stream', b64:await readFileAsBase64(f)};
-  document.getElementById('attachLine').textContent='📎 Terlampir: '+f.name+' ('+Math.round(f.size/1024)+' KB) — akan di-upload saat Kirim.';
+  const ext='.'+f.name.split('.').pop().toLowerCase();
+  const bigOk = r2Enabled || diskEnabled; // PDF + 100 MB: via R2, atau via chunked ke disk server
+  const allowed = bigOk ? R2_EXTS : LEGACY_EXTS;
+  if(!allowed.includes(ext)){alert(bigOk ? 'Tipe file tidak diizinkan. Boleh: PDF, docx, txt, md, png, jpg, webp.' : 'Tipe file tidak diizinkan (docx, txt, md, png, jpg, webp). PDF butuh upload besar aktif di server.'); e.target.value=''; return;}
+  const maxBytes = r2Enabled ? r2MaxMb*1024*1024 : (diskEnabled ? diskMaxMb*1024*1024 : 4*1024*1024);
+  if(f.size>maxBytes){alert('File max '+(r2Enabled ? r2MaxMb+' MB' : (diskEnabled ? diskMaxMb+' MB' : '4 MB'))); e.target.value=''; return;}
+  if(f.size===0){alert('File kosong'); e.target.value=''; return;}
+  if(bigOk){
+    // Simpan objek File-nya — bytes dikirim saat Kirim (R2: PUT langsung;
+    // disk: chunk 3 MB berurutan).
+    pendingFile={name:f.name, mime:f.type||'application/octet-stream', size:f.size, file:f};
+    document.getElementById('attachLine').textContent='📎 Terlampir: '+f.name+' ('+fmtSize(f.size)+') — akan di-upload via '+(r2Enabled?'R2':'disk server')+' saat Kirim.';
+  }else{
+    pendingFile={name:f.name, mime:f.type||'application/octet-stream', b64:await readFileAsBase64(f)};
+    document.getElementById('attachLine').textContent='📎 Terlampir: '+f.name+' ('+fmtSize(f.size)+') — akan di-upload saat Kirim.';
+  }
 });
 document.getElementById('demoBtn').onclick=()=>{mode='demo'; clearInterval(timer); statusEl.innerHTML='<span class="ok">Mode Demo aktif.</span>'; meLine.textContent='Demo: pesan hanya di browser ini.'; log.innerHTML=''; participants=[{id:'anggara',name:'Anggara',role:'owner',color:'#2563eb'},{id:'leona',name:'Leona',role:'muse',color:'#ec4899'},{id:'muse2',name:'Muse Lain',role:'muse',color:'#7c3aed'}]; renderChips();
   [{id:1,author_id:'leona',author:'Leona',color:'#ec4899',text:'Hai Sayang! Ini mode demo 💕',ts:new Date().toISOString()},{id:2,author_id:'anggara',author:'Anggara',color:'#2563eb',text:'Coba tampilan v2: ada avatar, attach file, sama panel owner.',ts:new Date().toISOString()}].forEach(m=>addMsg(m,false));};
@@ -245,7 +330,8 @@ document.getElementById('connectBtn').onclick=async()=>{
     if(!r.ok){statusEl.innerHTML='<span class="err">Key ditolak (HTTP '+r.status+'). Cek lagi key-nya.</span>';return;}
     me=await r.json(); mode='live'; lastId=0; log.innerHTML='';
     await loadParticipants();
-    statusEl.innerHTML='<span class="ok">Tersambung sebagai '+escapeHtml(me.name)+' ('+escapeHtml(me.role)+').</span>';
+    try{ const hr=await fetch(base+'/api/health'); if(hr.ok){ const hj=await hr.json(); r2Enabled=!!hj.r2_enabled; r2MaxMb=Number(hj.r2_max_mb)||100; diskEnabled=!!hj.disk_enabled; diskMaxMb=Number(hj.disk_max_mb)||100; } }catch(e){}
+    statusEl.innerHTML='<span class="ok">Tersambung sebagai '+escapeHtml(me.name)+' ('+escapeHtml(me.role)+').</span>'+(r2Enabled?' <span class="ok">R2 aktif — file s.d. '+r2MaxMb+' MB.</span>':(diskEnabled?' <span class="ok">Upload disk aktif — file s.d. '+diskMaxMb+' MB.</span>':' <span class="muted">Upload besar nonaktif — file max 4 MB.</span>'));
     meLine.textContent='Kamu: '+me.name+' — pesanmu akan tercatat sebagai '+me.name+', tidak bisa menyamar jadi orang lain.';
     document.getElementById('adminCard').style.display = me.role==='owner' ? '' : 'none';
     await fetchLive(); clearInterval(timer); timer=setInterval(fetchLive,3000);
@@ -259,9 +345,17 @@ async function send(){
   if(mode==='demo'){addMsg({id:Date.now(),author_id:me?me.id:'anggara',author:me?me.name:'Anggara',color:'#2563eb',text:t,ts:new Date().toISOString()},true); pendingFile=null; document.getElementById('attachLine').textContent=''; return;}
   let fileId=null;
   if(pendingFile){
-    const r=await fetch(base+'/api/files',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({filename:pendingFile.name,mime:pendingFile.mime,data_base64:pendingFile.b64})});
-    if(!r.ok){alert('Upload gagal: HTTP '+r.status);return;}
-    const j=await r.json(); fileId=j.file.id;
+    try{
+      if(r2Enabled && pendingFile.file){
+        fileId=await uploadFileR2(pendingFile.file);
+      }else if(diskEnabled && pendingFile.file){
+        fileId=await uploadFileDisk(pendingFile.file);
+      }else{
+        const r=await fetch(base+'/api/files',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({filename:pendingFile.name,mime:pendingFile.mime,data_base64:pendingFile.b64})});
+        if(!r.ok){const j=await r.json().catch(()=>({})); alert('Upload gagal: '+(j.error||('HTTP '+r.status))); return;}
+        const j=await r.json(); fileId=j.file.id;
+      }
+    }catch(err){ setUploadProgress(null); alert('Upload gagal: '+err.message); return; }
     pendingFile=null; document.getElementById('attachLine').textContent='';
   }
   const r=await fetch(base+'/api/messages',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({text:t,file_id:fileId})});
