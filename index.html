@@ -109,7 +109,7 @@ button.ghost{background:rgba(255,255,255,.06);color:#e5e9ff;border:1px solid rgb
 .filebox{margin-top:8px;font-size:13px;background:rgba(255,255,255,.06);border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px;text-align:left}
 .filebox pre{white-space:pre-wrap;font-size:12.5px;color:#cbd5ff;max-height:120px;overflow:auto;background:rgba(0,0,0,.35);padding:10px;border-radius:8px;border:1px solid var(--line-soft)}
 .filebox a{color:#a5b4fc}
-.row{display:flex;gap:8px;align-items:center}.row input{flex:1}
+.row{display:flex;gap:8px;align-items:center}.row input{flex:1 1 0;min-width:0;width:auto}.row select{flex:0 1 auto;width:auto;max-width:48%}
 .muted{color:var(--muted);font-size:13px}.ok{color:var(--ok)}.err{color:var(--err)}
 details{font-size:13px;color:#c3cbe8} details summary{cursor:pointer;color:#eef1ff}
 code{background:rgba(255,255,255,.08);border:1px solid var(--line-soft);padding:2px 6px;border-radius:6px;font-size:12px;color:#dbe4ff}
@@ -161,11 +161,11 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
 <h2>👑 Panel Owner</h2>
 <p class="muted">Tambah user, ganti nama, dan ganti foto profil — hanya owner yang bisa memakai panel ini.</p>
 <label>Tambah user baru</label>
-<div class="row"><input id="newName" placeholder="Nama, misal Muse Keempat"><button id="addUserBtn">Tambah</button></div>
+<div class="row"><input id="newName" placeholder="Nama, misal Muse Keempat" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="addUserBtn">Tambah</button></div>
 <p id="newKeyLine" class="muted"></p>
 <div class="divider"></div>
 <label>Ganti nama peserta</label>
-<div class="row"><select id="renameId"></select><input id="renameName" placeholder="Nama baru"><button id="renameBtn">Ganti nama</button></div>
+<div class="row"><select id="renameId"></select><input id="renameName" placeholder="Nama baru" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="renameBtn">Ganti nama</button></div>
 <div class="divider"></div>
 <label>Ganti foto profil (pfp) peserta — png/jpg/webp, max 1MB</label>
 <div class="row"><select id="avatarId"></select><input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"><button id="avatarBtn">Pasang pfp</button></div>
@@ -199,14 +199,23 @@ function avatarHtml(p, big){
   if(url) return '<img class="avatar'+(big?' big':'')+'" src="'+escapeHtml(url)+'" alt="">';
   return '<span class="avatar'+(big?' big':'')+'" style="background:'+color+'">'+initial+'</span>';
 }
+function syncRenameName(){
+  const s=document.getElementById('renameId');
+  const p=participants.find(x=>x.id===s.value);
+  if(p) document.getElementById('renameName').value=p.name;
+}
 function renderChips(){
   const el=document.getElementById('chips');
   el.innerHTML = participants.map(p=>'<span class="chip">'+avatarHtml(p)+escapeHtml(p.name)+(p.role==='owner'?' 👑':'')+'</span>').join('') || '<span class="muted">Belum ada daftar peserta.</span>';
   for(const sel of ['renameId','avatarId']){
     const s=document.getElementById(sel);
+    const prev=s.value;
     s.innerHTML = participants.map(p=>'<option value="'+escapeHtml(p.id)+'">'+escapeHtml(p.name)+' ('+escapeHtml(p.id)+')</option>').join('');
+    if(prev && [...s.options].some(o=>o.value===prev)) s.value=prev;
   }
+  syncRenameName();
 }
+document.getElementById('renameId').addEventListener('change',syncRenameName);
 function fmtSize(b){b=Number(b)||0; if(b>=1024*1024) return (b/(1024*1024)).toFixed(1)+' MB'; if(b>=1024) return Math.round(b/1024)+' KB'; return b+' B';}
 function fileHtml(m){
   if(!m.file) return '';
