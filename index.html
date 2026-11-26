@@ -299,7 +299,7 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
     <label>Ganti nama peserta</label>
     <div class="row" id="renameRow"><select id="renameId"></select><input id="renameName" placeholder="Nama baru" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="renameBtn">Ganti nama</button></div>
     <div class="divider"></div>
-    <label>Ganti foto profil (pfp) peserta — png/jpg/webp, max 1MB</label>
+    <label>Ganti foto profil (pfp) peserta — png/jpg/webp, max 10MB</label>
     <div class="row" id="avatarRow"><select id="avatarId"></select><input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"><button id="avatarBtn">Pasang pfp</button></div>
     <div class="divider"></div>
     <label>Hapus anggota</label>
@@ -320,7 +320,7 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
   <input id="myName" placeholder="Nama tampilan" maxlength="40" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   <button id="saveProfileNameBtn">Simpan nama</button>
   <div class="divider"></div>
-  <label>Foto profil — png/jpg/webp, max 1MB</label>
+  <label>Foto profil — png/jpg/webp, max 10MB</label>
   <input id="myPfpFile" type="file" accept="image/png,image/jpeg,image/webp">
   <button id="saveProfilePfpBtn" style="margin-top:8px">Pasang foto</button>
   <p id="profileMsg" class="muted"></p>
@@ -726,6 +726,9 @@ async function toggleReaction(mid, emoji){
 /* ---- profil sendiri ---- */
 function fillProfileSheet(){
   if(!me) return;
+  // `me` diset saat login dan bisa basi (mis. avatar_url masih null setelah
+  // pfp baru dipasang) — sinkronkan dari daftar peserta yang baru dimuat.
+  const fresh=participants.find(p=>p.id===me.id); if(fresh) me=fresh;
   document.getElementById('myName').value=me.name;
   document.getElementById('myProfileName').textContent=me.name;
   document.getElementById('myProfileRole').textContent='Peran: '+me.role+' • id: '+me.id;
@@ -743,7 +746,7 @@ document.getElementById('saveProfileNameBtn').onclick=async()=>{
 };
 document.getElementById('saveProfilePfpBtn').onclick=async()=>{
   const f=document.getElementById('myPfpFile').files[0]; if(!f){alert('Pilih gambar dulu');return;}
-  if(f.size>1024*1024){alert('Pfp max 1 MB');return;}
+  if(f.size>10*1024*1024){alert('Pfp max 10 MB');return;}
   const b64=await readFileAsBase64(f);
   const r=await fetch(base+'/api/admin/participants/'+encodeURIComponent(me.id)+'/avatar',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({mime:f.type,data_base64:b64})});
   const j=await r.json();
@@ -779,7 +782,7 @@ document.getElementById('renameBtn').onclick=async()=>{
 };
 document.getElementById('avatarBtn').onclick=async()=>{
   const id=document.getElementById('avatarId').value, f=document.getElementById('avatarFile').files[0]; if(!f){alert('Pilih gambar dulu');return;}
-  if(f.size>1024*1024){alert('Pfp max 1 MB');return;}
+  if(f.size>10*1024*1024){alert('Pfp max 10 MB');return;}
   const b64=await readFileAsBase64(f);
   const r=await fetch(base+'/api/admin/participants/'+encodeURIComponent(id)+'/avatar',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({mime:f.type,data_base64:b64})});
   const j=await r.json();
