@@ -163,6 +163,15 @@ button:disabled{opacity:.45;cursor:not-allowed;transform:none}
 /* baris rename & pfp di panel owner ditumpuk vertikal supaya input tidak kejepit (regresi fix 28px) */
 #renameRow,#avatarRow{flex-direction:column;align-items:stretch}
 #renameRow select,#renameRow input,#renameRow button,#avatarRow select,#avatarRow input,#avatarRow button{width:100%;max-width:none;flex:none}
+/* ---- daftar anggota di panel owner (dengan tombol hapus) ---- */
+.member-row{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line-soft)}
+.member-row:last-child{border-bottom:0}
+.member-row .member-name{flex:1;min-width:0;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member-row .member-id{font-size:12px;color:var(--faint)}
+button.danger{background:linear-gradient(135deg,#dc2626,#b91c1c);box-shadow:0 6px 20px rgba(220,38,38,.35)}
+button.small{padding:8px 14px;font-size:13px}
+#deleteConfirmBox{margin-top:10px;border:1px solid rgba(248,113,113,.55);background:rgba(248,113,113,.10);border-radius:14px;padding:12px}
+#deleteConfirmBox p{margin:0 0 10px;font-size:14px}
 .muted{color:var(--muted);font-size:13px}.ok{color:var(--ok)}.err{color:var(--err)}
 details{font-size:13px;color:#c3cbe8} details summary{cursor:pointer;color:#eef1ff}
 code{background:rgba(255,255,255,.08);border:1px solid var(--line-soft);padding:2px 6px;border-radius:6px;font-size:12px;color:#dbe4ff}
@@ -252,6 +261,13 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
     <div class="divider"></div>
     <label>Ganti foto profil (pfp) peserta — png/jpg/webp, max 1MB</label>
     <div class="row" id="avatarRow"><select id="avatarId"></select><input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"><button id="avatarBtn">Pasang pfp</button></div>
+    <div class="divider"></div>
+    <label>Hapus anggota</label>
+    <div id="memberList"></div>
+    <div id="deleteConfirmBox" style="display:none">
+      <p id="deleteConfirmText"></p>
+      <div class="row"><button id="deleteConfirmYes" class="danger">Ya, hapus</button><button id="deleteConfirmNo" class="ghost">Batal</button></div>
+    </div>
     <p id="adminMsg" class="muted"></p>
   </div>
 </div>
@@ -283,7 +299,7 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
   <p>R2 (kalau server sudah dikonfigurasi, cek <code>GET /api/health</code> → <code>r2_enabled</code>): <code>POST /api/files/presign</code> <code>{"name":"modul.pdf","size":25000000,"type":"application/pdf"}</code> → <code>{file_id, key, upload_url}</code>; PUT file langsung ke <code>upload_url</code> (max 100MB, .pdf/.docx/.txt/.md/.png/.jpg/.webp); <code>POST /api/files/confirm</code> <code>{"file_id","key","name","size","type"}</code> → metadata tersimpan di DB (bytes file TIDAK masuk Turso).</p>
   <p>Disk chunked (default kalau R2 tidak dikonfigurasi, cek <code>GET /api/health</code> → <code>disk_enabled</code>): <code>POST /api/files/init</code> <code>{"name","size","type"}</code> → <code>{upload_id, chunk_size: 3145728, total_chunks}</code>; <code>POST /api/files/chunk?upload_id=…&amp;index=…</code> (body = bytes chunk mentah, 3 MB, berurutan) → <code>{received_bytes}</code>; <code>POST /api/files/complete</code> <code>{"upload_id","name","size","type"}</code> → file tersimpan di disk server, metadata saja di DB. Max 100 MB, .pdf/.docx/.txt/.md/.png/.jpg/.webp.</p>
   <p><code>GET /api/files/:id</code> (butuh key, bisa <code>?key=...</code>) • <code>GET /api/files/:id/download</code> (file disk: stream dari server; file R2: redirect ke URL R2) • <code>GET /api/files</code> (daftar file R2/disk milikmu) • <code>GET /api/avatars/:id</code></p>
-  <p>Owner: <code>POST /api/admin/participants</code> <code>{"name":"..."}</code> • <code>PATCH /api/admin/participants/:id</code> <code>{"name":"..."}</code> • <code>POST /api/admin/participants/:id/avatar</code> <code>{"mime":"...","data_base64":"..."}</code> • <code>GET /api/admin/keys</code> • <code>POST /api/admin/rotate</code></p>
+  <p>Owner: <code>POST /api/admin/participants</code> <code>{"name":"..."}</code> • <code>PATCH /api/admin/participants/:id</code> <code>{"name":"..."}</code> • <code>DELETE /api/admin/participants/:id</code> (hapus anggota — pesannya tetap ada, key-nya langsung tidak berlaku) • <code>POST /api/admin/participants/:id/avatar</code> <code>{"mime":"...","data_base64":"..."}</code> • <code>GET /api/admin/keys</code> • <code>POST /api/admin/rotate</code></p>
   </details>
   <p class="muted">v2: peserta dinamis, penyimpanan Turso kalau <code>TURSO_DATABASE_URL</code> + <code>TURSO_AUTH_TOKEN</code> diisi di <code>.env</code>, kalau kosong pakai DB lokal <code>data/bridge.db</code>. File besar (modul belajar PDF sampai 100 MB) di-upload per chunk 3 MB dan disimpan di disk server (<code>data/uploads/</code>) — Turso hanya menyimpan metadata, bytes file tidak masuk kuota Turso 5GB. Kalau <code>R2_ACCOUNT_ID</code> + <code>R2_ACCESS_KEY_ID</code> + <code>R2_SECRET_ACCESS_KEY</code> + <code>R2_BUCKET</code> diisi di <code>.env</code> server, upload beralih ke Cloudflare R2 (browser PUT langsung, bucket butuh CORS untuk origin Bridge ini). Tanpa keduanya, upload tetap jalur lama: max 4 MB base64 ke database.</p>
   <p class="muted">Tips: tahan (long-press) bubble pesan untuk membalas atau memberi reaksi. Ketuk kutipan untuk lompat ke pesan aslinya. Pesan baru tidak akan menggulung layar kalau kamu sedang membaca ke atas — pakai tombol "Pesan baru ↓".</p>
@@ -330,6 +346,14 @@ function renderChips(){
     s.innerHTML = participants.map(p=>'<option value="'+escapeHtml(p.id)+'">'+escapeHtml(p.name)+' ('+escapeHtml(p.id)+')</option>').join('');
     if(prev && [...s.options].some(o=>o.value===prev)) s.value=prev;
   }
+  // Daftar anggota di panel owner — tombol Hapus hanya untuk NON-owner.
+  const ml=document.getElementById('memberList');
+  if(ml){
+    ml.innerHTML = participants.map(p=>{
+      const del = p.role==='owner' ? '' : '<button class="danger small" data-del-id="'+escapeHtml(p.id)+'" data-del-name="'+escapeHtml(p.name)+'">Hapus</button>';
+      return '<div class="member-row">'+avatarHtml(p)+'<span class="member-name">'+escapeHtml(p.name)+(p.role==='owner'?' 👑':'')+'</span><span class="member-id">'+escapeHtml(p.id)+'</span>'+del+'</div>';
+    }).join('') || '<span class="muted">Belum ada daftar peserta.</span>';
+  }
   syncRenameName();
   document.getElementById('chatSub').textContent = participants.length ? participants.map(p=>p.name).join(', ')+' • '+participants.length+' peserta' : '…';
   document.getElementById('chatAvatars').innerHTML = participants.slice(0,3).map(p=>avatarHtml(p)).join('');
@@ -365,6 +389,10 @@ function updateNewMsgBtn(){
 log.addEventListener('scroll', ()=>{ if(isNearBottom()) unreadNew=0; updateNewMsgBtn(); });
 document.getElementById('newMsgBtn').onclick=()=>{ log.scrollTop=log.scrollHeight; unreadNew=0; updateNewMsgBtn(); };
 function addMsg(m, isMe){
+  // Deduplikasi render: id yang sama tidak boleh di-append dua kali.
+  // Polling bisa tumpang tindih (lihat fetchLive) sehingga pesan yang sama
+  // bisa diterima dua kali — tanpa cek ini bubble-nya tampil ganda.
+  if (document.getElementById('msg-'+m.id)) { msgCache.set(m.id,m); return; }
   msgCache.set(m.id,m);
   const p = participants.find(x=>x.id===m.author_id) || {name:m.author, color:m.color, avatar_url:null};
   const near = isNearBottom();
@@ -405,7 +433,10 @@ async function loadParticipants(){
     if(r.ok){ const j=await r.json(); participants=j.participants||[]; renderChips(); }
   }catch(e){}
 }
+let fetchingLive=false; // pengaman: jangan ada dua poll fetchLive yang jalan bersamaan
 async function fetchLive(){
+  if(fetchingLive) return; // poll sebelumnya belum selesai — lewati tick ini
+  fetchingLive=true;
   try{
     const r=await fetch(base+'/api/messages?since_id='+lastId,{headers:{'X-API-Key':apiKey}});
     if(!r.ok){statusEl.innerHTML='<span class="err">Live gagal: HTTP '+r.status+' — cek URL / key.</span>';return;}
@@ -413,6 +444,7 @@ async function fetchLive(){
     j.messages.forEach(m=>{addMsg(m, me && m.author_id===me.id); lastId=Math.max(lastId,m.id);});
     await refreshReactions();
   }catch(e){statusEl.innerHTML='<span class="err">Tidak bisa reach server: '+escapeHtml(e.message)+'</span>';}
+  finally{ fetchingLive=false; }
 }
 function readFileAsBase64(file){return new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(file);});}
 // ---- R2: upload langsung browser -> R2 (file besar), dengan progress bar ----
@@ -704,6 +736,28 @@ document.getElementById('avatarBtn').onclick=async()=>{
   const r=await fetch(base+'/api/admin/participants/'+encodeURIComponent(id)+'/avatar',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({mime:f.type,data_base64:b64})});
   const j=await r.json();
   document.getElementById('adminMsg').textContent = r.ok ? 'Pfp '+j.participant.name+' dipasang.' : 'Gagal: '+(j.error||r.status);
+  await loadParticipants();
+};
+/* ---- hapus anggota (owner) ---- */
+let pendingDeleteId=null, pendingDeleteName='';
+document.getElementById('memberList').addEventListener('click',e=>{
+  const b=e.target.closest('[data-del-id]'); if(!b) return;
+  pendingDeleteId=b.getAttribute('data-del-id'); pendingDeleteName=b.getAttribute('data-del-name');
+  document.getElementById('deleteConfirmText').textContent='Yakin hapus '+pendingDeleteName+'? Pesannya tetap ada, tapi kursinya tidak bisa dipakai lagi.';
+  document.getElementById('deleteConfirmBox').style.display='block';
+});
+document.getElementById('deleteConfirmNo').onclick=()=>{
+  pendingDeleteId=null; pendingDeleteName='';
+  document.getElementById('deleteConfirmBox').style.display='none';
+};
+document.getElementById('deleteConfirmYes').onclick=async()=>{
+  if(!pendingDeleteId) return;
+  const id=pendingDeleteId, name=pendingDeleteName;
+  const r=await fetch(base+'/api/admin/participants/'+encodeURIComponent(id),{method:'DELETE',headers:{'X-API-Key':apiKey}});
+  const j=await r.json();
+  document.getElementById('deleteConfirmBox').style.display='none';
+  pendingDeleteId=null; pendingDeleteName='';
+  document.getElementById('adminMsg').textContent = r.ok ? name+' dihapus. Pesan dan file-nya tetap tersimpan.' : 'Gagal: '+(j.error||r.status);
   await loadParticipants();
 };
 </script></body></html>
