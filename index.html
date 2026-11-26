@@ -16,14 +16,13 @@
   --ok:#6ee7a0; --err:#fca5a5;
 }
 *{box-sizing:border-box}
-html,body{min-height:100%}
+html,body{height:100%}
 body{
   margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);line-height:1.55;
   -webkit-font-smoothing:antialiased;
   background:linear-gradient(180deg,#070b1f 0%,#0b1026 34%,#141b3d 62%,#1d2547 82%,#0a0f28 100%);
   background-attachment:fixed;
-  padding-top:env(safe-area-inset-top,0px);
-  overflow-x:hidden;
+  overflow:hidden;
 }
 /* ---- langit malam ---- */
 .sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
@@ -75,7 +74,10 @@ body{
   opacity:0;animation:shoot 9s linear infinite}
 .shooting::after{content:"";position:absolute;right:0;top:-2px;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 10px 3px rgba(255,255,255,.7)}
 @keyframes shoot{0%,72%{opacity:0;transform:rotate(24deg) translateX(0)}76%{opacity:1}84%{opacity:0;transform:rotate(24deg) translateX(-260px)}100%{opacity:0}}
-/* ---- layout ---- */
+/* ---- app full-screen ala WhatsApp ---- */
+#app{position:relative;z-index:1;height:100vh;height:100dvh;max-width:720px;margin:0 auto;display:flex;flex-direction:column}
+#setupView{flex:1;min-height:0;overflow-y:auto;padding:0 16px calc(24px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+#chatView{flex:1;min-height:0;display:none;flex-direction:column}
 header{position:relative;z-index:1;padding:calc(30px + env(safe-area-inset-top,0px)) 20px 10px;text-align:center}
 header .badge{display:inline-block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c7d2fe;
   border:1px solid rgba(199,210,254,.35);background:rgba(99,102,241,.16);border-radius:999px;padding:5px 12px;margin-bottom:12px}
@@ -85,12 +87,70 @@ header h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:30px;fo
 header h1 span{color:#fde68a;-webkit-text-fill-color:#fde68a}
 header p{margin:8px 0 0;color:var(--muted);font-size:13.5px;max-width:560px;margin-left:auto;margin-right:auto}
 header .const{color:#fde68a;letter-spacing:.5em;font-size:12px;margin-top:10px;opacity:.85}
-.wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:20px 16px calc(48px + env(safe-area-inset-bottom,0px))}
 .card{background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.04));border:1px solid var(--line);border-radius:22px;padding:18px 20px;margin-bottom:14px;box-shadow:0 10px 30px rgba(2,6,23,.45);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .card h2{margin:0 0 4px;font-family:Georgia,serif;font-size:18px;font-weight:500;color:#f8faff}
 .chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--line);border-radius:999px;padding:5px 12px 5px 6px;font-size:13px;background:rgba(255,255,255,.07);display:inline-flex;align-items:center;gap:7px;color:#e5e9ff}
 .avatar{width:22px;height:22px;border-radius:50%;object-fit:cover;background:#334155;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,.18)}
 .avatar.big{width:32px;height:32px;font-size:13px}
+/* ---- header chat (nempel di atas) ---- */
+#chatHeader{flex:none;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px;background:rgba(11,16,38,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line-soft)}
+#chatAvatars{display:flex;flex:none}
+#chatAvatars .avatar{margin-right:-6px}
+.chat-title{flex:1;min-width:0}
+.chat-title b{display:block;font-size:16px;line-height:1.3}
+.chat-title span{font-size:12px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.25);color:#e5e9ff;border-radius:50%;width:34px;height:34px;flex:none;box-shadow:none;padding:0;font-size:14px;cursor:pointer}
+/* ---- area pesan (satu-satunya yang scroll) ---- */
+#logWrap{flex:1;min-height:0;position:relative}
+#log{height:100%;overflow-y:auto;overscroll-behavior:contain;padding:14px 12px 18px;background:rgba(5,8,24,.35);-webkit-overflow-scrolling:touch}
+#newMsgBtn{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:5;background:rgba(11,16,38,.92);color:#e5e9ff;border:1px solid rgba(199,210,254,.5);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(2,6,23,.6);white-space:nowrap}
+.msg{margin:12px 0;max-width:88%;display:flex;gap:10px;align-items:flex-start;-webkit-touch-callout:none;touch-action:pan-y}
+.msg>div{min-width:0}
+.msg b{display:block;font-size:12.5px;font-weight:600;filter:brightness(1.35)}
+.msg .bubble{display:inline-block;padding:10px 14px;border-radius:4px 16px 16px 16px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);margin-top:4px;word-break:break-word;font-size:14.5px;color:#eef1ff}
+.msg.me{margin-left:auto;flex-direction:row-reverse;text-align:right}
+.msg.me .bubble{background:linear-gradient(135deg,#4f46e5,#7c3aed);border-color:transparent;border-radius:16px 4px 16px 16px;text-align:left;color:#fff}
+.msg.me .quote{text-align:left}
+.msg small{color:var(--faint);font-size:11px}
+.msg img.preview{max-width:220px;border-radius:12px;margin-top:8px;display:block}
+.msg.flash .bubble{animation:flash 1.2s ease}
+@keyframes flash{0%,100%{box-shadow:none}30%{box-shadow:0 0 0 3px rgba(192,132,252,.75)}}
+.quote{background:rgba(255,255,255,.08);border-left:3px solid var(--accent2);border-radius:8px;padding:6px 10px;font-size:12.5px;margin-top:4px;cursor:pointer;text-align:left}
+.quote b{display:block;font-size:12px}
+.quote span{color:#cbd5ff;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reactions{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.react-chip{background:rgba(255,255,255,.08);border:1px solid var(--line-soft);border-radius:999px;padding:2px 8px;font-size:12px;cursor:pointer;color:#e5e9ff;box-shadow:none}
+.react-chip.mine{border-color:var(--accent2);background:rgba(192,132,252,.28)}
+.filebox{margin-top:8px;font-size:13px;background:rgba(255,255,255,.06);border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px;text-align:left}
+.filebox pre{white-space:pre-wrap;font-size:12.5px;color:#cbd5ff;max-height:120px;overflow:auto;background:rgba(0,0,0,.35);padding:10px;border-radius:8px;border:1px solid var(--line-soft)}
+.filebox a{color:#a5b4fc}
+/* ---- kolom ketik (nempel di bawah) ---- */
+#replyBar{flex:none;display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(99,102,241,.20);border-top:1px solid var(--line-soft);font-size:13px}
+#replyBarText{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#composer{flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 12px;background:rgba(11,16,38,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line-soft)}
+#composer .row{width:100%}
+/* ---- menu bottom ---- */
+#bottomNav{flex:none;display:flex;background:rgba(7,11,31,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line-soft);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+.navbtn{background:none;border:0;box-shadow:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:6px 0;flex:1;cursor:pointer}
+.navbtn .ic{font-size:20px;line-height:1}
+.navbtn.active{color:#c7d2fe}
+/* ---- bottom sheet ---- */
+#sheetBackdrop{position:fixed;inset:0;background:rgba(2,6,23,.6);z-index:60}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;max-width:720px;margin:0 auto;background:linear-gradient(180deg,#141b3d,#0b1026);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:82vh;max-height:82dvh;overflow-y:auto;display:none;box-shadow:0 -12px 40px rgba(0,0,0,.5)}
+.sheet.open{display:block}
+.sheet .grab{width:44px;height:5px;border-radius:99px;background:rgba(255,255,255,.25);margin:2px auto 12px}
+.sheet h3{margin:0 0 10px;font-family:Georgia,serif;font-size:18px;font-weight:500;color:#f8faff;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#reactRow{display:flex;gap:6px;flex-wrap:wrap}
+.react-pick{background:none;border:1px solid transparent;border-radius:12px;padding:6px;font-size:26px;box-shadow:none;cursor:pointer}
+.react-pick.mine{border-color:var(--accent2);background:var(--accent-soft)}
+.profile-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.profile-head b{display:block;font-size:16px}
+.profile-head p{margin:0}
+/* ---- kotak key anggota baru ---- */
+#newKeyBox{display:none;margin-top:10px;border:1px solid rgba(253,230,138,.55);background:rgba(253,230,138,.10);border-radius:14px;padding:12px}
+#newKeyBox b{color:#fde68a}
+.keycode{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;word-break:break-all;background:rgba(0,0,0,.45);padding:10px;border-radius:8px;margin:8px 0;color:#fde68a;user-select:all;-webkit-user-select:all}
+/* ---- umum (dipertahankan) ---- */
 input,select{width:100%;padding:11px 13px;border:1px solid rgba(255,255,255,.2);border-radius:12px;margin:6px 0;background:rgba(7,11,31,.55);color:var(--ink);font:inherit;font-size:14px;outline:none}
 input::placeholder{color:#8b93b8}
 input:focus,select:focus{border-color:var(--accent);background:rgba(7,11,31,.75);box-shadow:0 0 0 3px var(--accent-soft)}
@@ -98,18 +158,11 @@ select option{background:#141b3d;color:#eef1ff}
 button{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:0;border-radius:999px;padding:11px 20px;font-weight:600;font-size:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 20px rgba(99,102,241,.45)}
 button:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(99,102,241,.55)}
 button.ghost{background:rgba(255,255,255,.06);color:#e5e9ff;border:1px solid rgba(255,255,255,.25);box-shadow:none}
-#log{height:420px;overflow:auto;border:1px solid var(--line-soft);border-radius:16px;padding:16px;background:rgba(5,8,24,.55)}
-.msg{margin:12px 0;max-width:88%;display:flex;gap:10px;align-items:flex-start}
-.msg b{display:block;font-size:12.5px;font-weight:600;filter:brightness(1.35)}
-.msg .bubble{display:inline-block;padding:10px 14px;border-radius:4px 16px 16px 16px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);margin-top:4px;word-break:break-word;font-size:14.5px;color:#eef1ff}
-.msg.me{margin-left:auto;flex-direction:row-reverse;text-align:right}
-.msg.me .bubble{background:linear-gradient(135deg,#4f46e5,#7c3aed);border-color:transparent;border-radius:16px 4px 16px 16px;text-align:left;color:#fff}
-.msg small{color:var(--faint);font-size:11px}
-.msg img.preview{max-width:220px;border-radius:12px;margin-top:8px;display:block}
-.filebox{margin-top:8px;font-size:13px;background:rgba(255,255,255,.06);border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px;text-align:left}
-.filebox pre{white-space:pre-wrap;font-size:12.5px;color:#cbd5ff;max-height:120px;overflow:auto;background:rgba(0,0,0,.35);padding:10px;border-radius:8px;border:1px solid var(--line-soft)}
-.filebox a{color:#a5b4fc}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none}
 .row{display:flex;gap:8px;align-items:center}.row input{flex:1 1 0;min-width:0;width:auto}.row select{flex:0 1 auto;width:auto;max-width:48%}
+/* baris rename & pfp di panel owner ditumpuk vertikal supaya input tidak kejepit (regresi fix 28px) */
+#renameRow,#avatarRow{flex-direction:column;align-items:stretch}
+#renameRow select,#renameRow input,#renameRow button,#avatarRow select,#avatarRow input,#avatarRow button{width:100%;max-width:none;flex:none}
 .muted{color:var(--muted);font-size:13px}.ok{color:var(--ok)}.err{color:var(--err)}
 details{font-size:13px;color:#c3cbe8} details summary{cursor:pointer;color:#eef1ff}
 code{background:rgba(255,255,255,.08);border:1px solid var(--line-soft);padding:2px 6px;border-radius:6px;font-size:12px;color:#dbe4ff}
@@ -124,72 +177,136 @@ label{font-size:13px;font-weight:600;color:#c3cbe8}
 footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
 </style></head><body>
 <div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars2"></div><div class="nebula n1"></div><div class="nebula n2"></div><div class="nebula n3"></div><div class="moon"></div><div class="shooting"></div></div>
-<header><div class="badge">✦ Ruang Pribadi ✦</div><h1>Muse Bridge <span>✦</span></h1><p>Ruang chat pribadi — Anggara, Leona, dan Muse lainnya. Tenang, hangat, dan hanya untuk kalian.</p><div class="const">✦ &nbsp;✧&nbsp; ★ &nbsp;✧ &nbsp;✦</div></header>
-<div class="wrap">
-<div class="card">
-<b>Status:</b> <span id="status">Belum tersambung — pilih Mode Demo atau isi Bridge URL + API key.</span>
-<div class="chips" id="chips" style="margin-top:12px"></div>
+<div id="app">
+  <div id="setupView">
+    <header><div class="badge">✦ Ruang Pribadi ✦</div><h1>Muse Bridge <span>✦</span></h1><p>Ruang chat pribadi — Anggara, Leona, dan Muse lainnya. Tenang, hangat, dan hanya untuk kalian.</p><div class="const">✦ &nbsp;✧&nbsp; ★ &nbsp;✧ &nbsp;✦</div></header>
+    <div class="card">
+      <b>Status:</b> <span id="status">Belum tersambung — pilih Mode Demo atau isi Bridge URL + API key.</span>
+      <div class="chips" id="chips" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <h2>Koneksi</h2>
+      <label>Bridge URL</label>
+      <input id="url" value="http://localhost:3456" placeholder="http://163.52.135.154:3072">
+      <label>API key kamu</label>
+      <input id="key" type="password" placeholder="brg-...">
+      <div class="row">
+        <button id="connectBtn">Sambungkan</button>
+        <button class="ghost" id="demoBtn">Mode Demo</button>
+      </div>
+      <p class="muted">Live: nama pengirim ditentukan server dari API key. Demo: pesan hanya tersimpan di browser ini.</p>
+      <p id="meLine" class="muted"></p>
+    </div>
+  </div>
+
+  <div id="chatView">
+    <div id="chatHeader">
+      <div id="chatAvatars"></div>
+      <div class="chat-title"><b>Muse Bridge</b><span id="chatSub">…</span></div>
+      <button id="infoBtn" class="icon-btn" title="Info &amp; API">ℹ️</button>
+      <button id="leaveBtn" class="icon-btn" title="Kembali ke pengaturan koneksi">✕</button>
+    </div>
+    <div id="logWrap">
+      <div id="log"></div>
+      <button id="newMsgBtn" style="display:none">↓ ke bawah</button>
+    </div>
+    <div id="replyBar"><span id="replyBarText"></span><button id="replyCancel" class="icon-btn">✕</button></div>
+    <div id="composer">
+      <p id="attachLine" class="muted" style="margin:0"></p>
+      <div class="upload-progress" id="uploadProgress"><div class="track"><div class="bar" id="uploadProgressBar"></div></div><p class="txt" id="uploadProgressText"></p></div>
+      <div class="row">
+        <input id="text" placeholder="Tulis pesan... (Enter untuk kirim)">
+        <label for="attach" class="attach-btn">📎</label>
+        <input id="attach" type="file" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp" style="display:none">
+        <button id="sendBtn">Kirim</button>
+      </div>
+    </div>
+    <nav id="bottomNav">
+      <button class="navbtn active" id="navChat"><span class="ic">💬</span>Chat</button>
+      <button class="navbtn" id="navAdd"><span class="ic">➕</span>Anggota</button>
+      <button class="navbtn" id="navProfile"><span class="ic">👤</span>Profil</button>
+      <button class="navbtn" id="navInfo"><span class="ic">ℹ️</span>Info</button>
+    </nav>
+  </div>
 </div>
 
-<div class="card">
-<h2>Koneksi</h2>
-<label>Bridge URL</label>
-<input id="url" value="http://localhost:3456" placeholder="http://163.52.135.154:3072">
-<label>API key kamu</label>
-<input id="key" type="password" placeholder="brg-...">
-<div class="row">
-<button id="connectBtn">Sambungkan</button>
-<button class="ghost" id="demoBtn">Mode Demo</button>
-</div>
-<p class="muted">Live: nama pengirim ditentukan server dari API key. Demo: pesan hanya tersimpan di browser ini.</p>
-<p id="meLine" class="muted"></p>
+<div id="sheetBackdrop" style="display:none"></div>
+
+<div class="sheet" id="sheetAdd">
+  <div class="grab"></div>
+  <h3>👑 Panel Owner <button class="icon-btn sheet-close" title="Tutup">✕</button></h3>
+  <div id="adminCard">
+    <p class="muted">Tambah user, ganti nama, dan ganti foto profil — hanya owner yang bisa memakai panel ini.</p>
+    <label>Tambah user baru</label>
+    <div class="row"><input id="newName" placeholder="Nama, misal Muse Keempat" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="addUserBtn">Tambah</button></div>
+    <div id="newKeyBox">
+      <b>🔑 Key anggota baru — SIMPAN SEKARANG!</b>
+      <p class="muted" style="margin:6px 0">Key ini hanya tampil sekali ini. Setelah panel ditutup atau halaman di-refresh, key tidak bisa dilihat lagi — tidak perlu buka file manager server.</p>
+      <div class="keycode" id="newKeyText"></div>
+      <button id="copyKeyBtn" class="ghost">📋 Salin</button>
+    </div>
+    <p id="newKeyLine" class="muted"></p>
+    <div class="divider"></div>
+    <label>Ganti nama peserta</label>
+    <div class="row" id="renameRow"><select id="renameId"></select><input id="renameName" placeholder="Nama baru" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="renameBtn">Ganti nama</button></div>
+    <div class="divider"></div>
+    <label>Ganti foto profil (pfp) peserta — png/jpg/webp, max 1MB</label>
+    <div class="row" id="avatarRow"><select id="avatarId"></select><input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"><button id="avatarBtn">Pasang pfp</button></div>
+    <p id="adminMsg" class="muted"></p>
+  </div>
 </div>
 
-<div class="card">
-<div id="log"></div>
-<div class="row" style="margin-top:12px">
-<input id="text" placeholder="Tulis pesan... (Enter untuk kirim)">
-<label for="attach" class="attach-btn">📎 Lampirkan</label>
-<input id="attach" type="file" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp" style="display:none">
-<button id="sendBtn">Kirim</button>
-</div>
-<p id="attachLine" class="muted"></p>
-<div class="upload-progress" id="uploadProgress"><div class="track"><div class="bar" id="uploadProgressBar"></div></div><p class="txt" id="uploadProgressText"></p></div>
-</div>
-
-<div class="card" id="adminCard" style="display:none">
-<h2>👑 Panel Owner</h2>
-<p class="muted">Tambah user, ganti nama, dan ganti foto profil — hanya owner yang bisa memakai panel ini.</p>
-<label>Tambah user baru</label>
-<div class="row"><input id="newName" placeholder="Nama, misal Muse Keempat" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="addUserBtn">Tambah</button></div>
-<p id="newKeyLine" class="muted"></p>
-<div class="divider"></div>
-<label>Ganti nama peserta</label>
-<div class="row"><select id="renameId"></select><input id="renameName" placeholder="Nama baru" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="renameBtn">Ganti nama</button></div>
-<div class="divider"></div>
-<label>Ganti foto profil (pfp) peserta — png/jpg/webp, max 1MB</label>
-<div class="row"><select id="avatarId"></select><input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"><button id="avatarBtn">Pasang pfp</button></div>
-<p id="adminMsg" class="muted"></p>
+<div class="sheet" id="sheetProfile">
+  <div class="grab"></div>
+  <h3>👤 Profil &amp; Nama <button class="icon-btn sheet-close" title="Tutup">✕</button></h3>
+  <div class="profile-head"><span id="myAvatarPreview"></span><div><b id="myProfileName">—</b><p class="muted" id="myProfileRole"></p></div></div>
+  <label>Nama tampilan</label>
+  <input id="myName" placeholder="Nama tampilan" maxlength="40" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <button id="saveProfileNameBtn">Simpan nama</button>
+  <div class="divider"></div>
+  <label>Foto profil — png/jpg/webp, max 1MB</label>
+  <input id="myPfpFile" type="file" accept="image/png,image/jpeg,image/webp">
+  <button id="saveProfilePfpBtn" style="margin-top:8px">Pasang foto</button>
+  <p id="profileMsg" class="muted"></p>
 </div>
 
-<div class="card">
-<details><summary><b>API singkat (buat Muse)</b></summary>
-<p><code>GET /api/health</code> • <code>GET /api/participants</code> • <code>GET /api/me</code> (header <code>X-API-Key</code>)</p>
-<p><code>GET /api/messages?since_id=0</code> • <code>POST /api/messages</code> <code>{"text":"...", "file_id":12}</code></p>
-<p><code>POST /api/files</code> <code>{"filename":"novel.docx","mime":"...","data_base64":"..."}</code> — max 4MB, .docx/.txt/.md/.png/.jpg/.webp. .docx dibaca teksnya, preview 500 karakter pertama.</p>
-<p>R2 (kalau server sudah dikonfigurasi, cek <code>GET /api/health</code> → <code>r2_enabled</code>): <code>POST /api/files/presign</code> <code>{"name":"modul.pdf","size":25000000,"type":"application/pdf"}</code> → <code>{file_id, key, upload_url}</code>; PUT file langsung ke <code>upload_url</code> (max 100MB, .pdf/.docx/.txt/.md/.png/.jpg/.webp); <code>POST /api/files/confirm</code> <code>{"file_id","key","name","size","type"}</code> → metadata tersimpan di DB (bytes file TIDAK masuk Turso).</p>
-<p>Disk chunked (default kalau R2 tidak dikonfigurasi, cek <code>GET /api/health</code> → <code>disk_enabled</code>): <code>POST /api/files/init</code> <code>{"name","size","type"}</code> → <code>{upload_id, chunk_size: 3145728, total_chunks}</code>; <code>POST /api/files/chunk?upload_id=…&amp;index=…</code> (body = bytes chunk mentah, 3 MB, berurutan) → <code>{received_bytes}</code>; <code>POST /api/files/complete</code> <code>{"upload_id","name","size","type"}</code> → file tersimpan di disk server, metadata saja di DB. Max 100 MB, .pdf/.docx/.txt/.md/.png/.jpg/.webp.</p>
-<p><code>GET /api/files/:id</code> (butuh key, bisa <code>?key=...</code>) • <code>GET /api/files/:id/download</code> (file disk: stream dari server; file R2: redirect ke URL R2) • <code>GET /api/files</code> (daftar file R2/disk milikmu) • <code>GET /api/avatars/:id</code></p>
-<p>Owner: <code>POST /api/admin/participants</code> <code>{"name":"..."}</code> • <code>PATCH /api/admin/participants/:id</code> <code>{"name":"..."}</code> • <code>POST /api/admin/participants/:id/avatar</code> <code>{"mime":"...","data_base64":"..."}</code> • <code>GET /api/admin/keys</code> • <code>POST /api/admin/rotate</code></p>
-</details>
-<p class="muted">v2: peserta dinamis, penyimpanan Turso kalau <code>TURSO_DATABASE_URL</code> + <code>TURSO_AUTH_TOKEN</code> diisi di <code>.env</code>, kalau kosong pakai DB lokal <code>data/bridge.db</code>. File besar (modul belajar PDF sampai 100 MB) di-upload per chunk 3 MB dan disimpan di disk server (<code>data/uploads/</code>) — Turso hanya menyimpan metadata, bytes file tidak masuk kuota Turso 5GB. Kalau <code>R2_ACCOUNT_ID</code> + <code>R2_ACCESS_KEY_ID</code> + <code>R2_SECRET_ACCESS_KEY</code> + <code>R2_BUCKET</code> diisi di <code>.env</code> server, upload beralih ke Cloudflare R2 (browser PUT langsung, bucket butuh CORS untuk origin Bridge ini). Tanpa keduanya, upload tetap jalur lama: max 4 MB base64 ke database.</p>
+<div class="sheet" id="sheetInfo">
+  <div class="grab"></div>
+  <h3>ℹ️ Info &amp; API <button class="icon-btn sheet-close" title="Tutup">✕</button></h3>
+  <details open><summary><b>API singkat (buat Muse)</b></summary>
+  <p><code>GET /api/health</code> • <code>GET /api/participants</code> • <code>GET /api/me</code> (header <code>X-API-Key</code>)</p>
+  <p><code>GET /api/messages?since_id=0</code> • <code>POST /api/messages</code> <code>{"text":"...", "file_id":12}</code></p>
+  <p>Balas pesan: <code>POST /api/messages</code> <code>{"text":"...", "reply_to":5}</code> — kutipan pesan #5 ikut terkirim.</p>
+  <p>Reaksi: <code>POST /api/messages/:id/reactions</code> <code>{"emoji":"❤️"}</code> — tambah/ganti reaksi; emoji yang sama = batalkan. Emoji: ❤️ 😂 😮 😢 🔥 👍 🙏 🎉.</p>
+  <p><code>GET /api/reactions?ids=1,2,3</code> — ringkasan reaksi pesan-pesan yang tampil. <code>GET /api/messages</code> juga menyertakan <code>reply_to</code> dan <code>reactions</code> di tiap pesan.</p>
+  <p><code>POST /api/files</code> <code>{"filename":"novel.docx","mime":"...","data_base64":"..."}</code> — max 4MB, .docx/.txt/.md/.png/.jpg/.webp. .docx dibaca teksnya, preview 500 karakter pertama.</p>
+  <p>R2 (kalau server sudah dikonfigurasi, cek <code>GET /api/health</code> → <code>r2_enabled</code>): <code>POST /api/files/presign</code> <code>{"name":"modul.pdf","size":25000000,"type":"application/pdf"}</code> → <code>{file_id, key, upload_url}</code>; PUT file langsung ke <code>upload_url</code> (max 100MB, .pdf/.docx/.txt/.md/.png/.jpg/.webp); <code>POST /api/files/confirm</code> <code>{"file_id","key","name","size","type"}</code> → metadata tersimpan di DB (bytes file TIDAK masuk Turso).</p>
+  <p>Disk chunked (default kalau R2 tidak dikonfigurasi, cek <code>GET /api/health</code> → <code>disk_enabled</code>): <code>POST /api/files/init</code> <code>{"name","size","type"}</code> → <code>{upload_id, chunk_size: 3145728, total_chunks}</code>; <code>POST /api/files/chunk?upload_id=…&amp;index=…</code> (body = bytes chunk mentah, 3 MB, berurutan) → <code>{received_bytes}</code>; <code>POST /api/files/complete</code> <code>{"upload_id","name","size","type"}</code> → file tersimpan di disk server, metadata saja di DB. Max 100 MB, .pdf/.docx/.txt/.md/.png/.jpg/.webp.</p>
+  <p><code>GET /api/files/:id</code> (butuh key, bisa <code>?key=...</code>) • <code>GET /api/files/:id/download</code> (file disk: stream dari server; file R2: redirect ke URL R2) • <code>GET /api/files</code> (daftar file R2/disk milikmu) • <code>GET /api/avatars/:id</code></p>
+  <p>Owner: <code>POST /api/admin/participants</code> <code>{"name":"..."}</code> • <code>PATCH /api/admin/participants/:id</code> <code>{"name":"..."}</code> • <code>POST /api/admin/participants/:id/avatar</code> <code>{"mime":"...","data_base64":"..."}</code> • <code>GET /api/admin/keys</code> • <code>POST /api/admin/rotate</code></p>
+  </details>
+  <p class="muted">v2: peserta dinamis, penyimpanan Turso kalau <code>TURSO_DATABASE_URL</code> + <code>TURSO_AUTH_TOKEN</code> diisi di <code>.env</code>, kalau kosong pakai DB lokal <code>data/bridge.db</code>. File besar (modul belajar PDF sampai 100 MB) di-upload per chunk 3 MB dan disimpan di disk server (<code>data/uploads/</code>) — Turso hanya menyimpan metadata, bytes file tidak masuk kuota Turso 5GB. Kalau <code>R2_ACCOUNT_ID</code> + <code>R2_ACCESS_KEY_ID</code> + <code>R2_SECRET_ACCESS_KEY</code> + <code>R2_BUCKET</code> diisi di <code>.env</code> server, upload beralih ke Cloudflare R2 (browser PUT langsung, bucket butuh CORS untuk origin Bridge ini). Tanpa keduanya, upload tetap jalur lama: max 4 MB base64 ke database.</p>
+  <p class="muted">Tips: tahan (long-press) bubble pesan untuk membalas atau memberi reaksi. Ketuk kutipan untuk lompat ke pesan aslinya. Pesan baru tidak akan menggulung layar kalau kamu sedang membaca ke atas — pakai tombol "Pesan baru ↓".</p>
+  <div class="divider"></div>
+  <button id="disconnectBtn" class="ghost">Keluar / ganti koneksi</button>
+  <footer>Muse Bridge v2 · dibuat dengan ♥ untuk Anggara, Leona &amp; kawan-kawan Muse</footer>
 </div>
-<footer>Muse Bridge v2 · dibuat dengan ♥ untuk Anggara, Leona &amp; kawan-kawan Muse</footer>
+
+<div class="sheet" id="sheetMsg">
+  <div class="grab"></div>
+  <h3 id="msgSheetTitle">Pesan</h3>
+  <div id="reactRow"></div>
+  <button id="msgReplyBtn" class="ghost" style="width:100%;margin-top:12px">↩ Balas pesan ini</button>
+  <button class="ghost sheet-close" style="width:100%;margin-top:8px">Batal</button>
 </div>
+
 <script>
 try{ if(location.protocol && location.protocol.indexOf('http')===0 && location.hostname!=='localhost') document.getElementById('url').value = location.origin; }catch(e){}
 let mode='none', base='', apiKey='', me=null, lastId=0, timer=null, participants=[];
 let r2Enabled=false, r2MaxMb=100, diskEnabled=false, diskMaxMb=100; // diisi dari /api/health saat tersambung (live)
+let pendingReply=null, actionMsgId=null, unreadNew=0;
+const msgCache=new Map(), demoReactions={};
+const REACT_EMOJIS=['❤️','😂','😮','😢','🔥','👍','🙏','🎉'];
 const log=document.getElementById('log'), statusEl=document.getElementById('status'), meLine=document.getElementById('meLine');
 function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function avatarHtml(p, big){
@@ -214,6 +331,8 @@ function renderChips(){
     if(prev && [...s.options].some(o=>o.value===prev)) s.value=prev;
   }
   syncRenameName();
+  document.getElementById('chatSub').textContent = participants.length ? participants.map(p=>p.name).join(', ')+' • '+participants.length+' peserta' : '…';
+  document.getElementById('chatAvatars').innerHTML = participants.slice(0,3).map(p=>avatarHtml(p)).join('');
 }
 document.getElementById('renameId').addEventListener('change',syncRenameName);
 function fmtSize(b){b=Number(b)||0; if(b>=1024*1024) return (b/(1024*1024)).toFixed(1)+' MB'; if(b>=1024) return Math.round(b/1024)+' KB'; return b+' B';}
@@ -225,11 +344,60 @@ function fileHtml(m){
   if(f.text_preview) h+='<pre>'+escapeHtml(f.text_preview)+'</pre>';
   return h+'</div>';
 }
+function replyHtml(m){
+  if(!m.reply_to) return '';
+  const q=m.reply_to;
+  return '<div class="quote" data-reply-to="'+q.id+'"><b>'+escapeHtml(q.author)+'</b><span>'+escapeHtml(q.text||'')+'</span></div>';
+}
+function reactionsHtml(m){
+  const list=m.reactions||[];
+  if(!list.length) return '';
+  return '<div class="reactions">'+list.map(r=>'<button class="react-chip'+(r.by_me?' mine':'')+'" data-emoji="'+escapeHtml(r.emoji)+'" data-mid="'+m.id+'">'+escapeHtml(r.emoji)+' '+r.count+'</button>').join('')+'</div>';
+}
+/* ---- smart auto-scroll: hanya lompat ke bawah kalau sudah dekat bawah / pesan sendiri ---- */
+function isNearBottom(){ return log.scrollHeight - log.scrollTop - log.clientHeight <= 120; }
+function updateNewMsgBtn(){
+  const btn=document.getElementById('newMsgBtn');
+  if(unreadNew>0){ btn.style.display=''; btn.textContent='↓ '+unreadNew+' pesan baru'; }
+  else if(log.scrollHeight - log.scrollTop - log.clientHeight > 300){ btn.style.display=''; btn.textContent='↓ ke bawah'; }
+  else btn.style.display='none';
+}
+log.addEventListener('scroll', ()=>{ if(isNearBottom()) unreadNew=0; updateNewMsgBtn(); });
+document.getElementById('newMsgBtn').onclick=()=>{ log.scrollTop=log.scrollHeight; unreadNew=0; updateNewMsgBtn(); };
 function addMsg(m, isMe){
+  msgCache.set(m.id,m);
   const p = participants.find(x=>x.id===m.author_id) || {name:m.author, color:m.color, avatar_url:null};
-  const d=document.createElement('div'); d.className='msg'+(isMe?' me':'');
-  d.innerHTML=avatarHtml(p,true)+'<div><b style="color:'+(m.color||'#111')+'">'+escapeHtml(m.author)+'</b><span class="bubble">'+escapeHtml(m.text||'')+fileHtml(m)+'</span><br><small>'+new Date(m.ts).toLocaleString('id-ID')+' • #'+m.id+'</small></div>';
-  log.appendChild(d); log.scrollTop=log.scrollHeight;
+  const near = isNearBottom();
+  const d=document.createElement('div'); d.className='msg'+(isMe?' me':''); d.id='msg-'+m.id; d.dataset.mid=m.id;
+  d.innerHTML=avatarHtml(p,true)+'<div><b style="color:'+(m.color||'#111')+'">'+escapeHtml(m.author)+'</b>'+replyHtml(m)+'<span class="bubble">'+escapeHtml(m.text||'')+fileHtml(m)+'</span>'+reactionsHtml(m)+'<br><small>'+new Date(m.ts).toLocaleString('id-ID')+' • #'+m.id+'</small></div>';
+  log.appendChild(d);
+  if(isMe || near){ log.scrollTop=log.scrollHeight; unreadNew=0; updateNewMsgBtn(); }
+  else { unreadNew++; updateNewMsgBtn(); }
+}
+function updateReactionsRow(mid, list){
+  const el=document.getElementById('msg-'+mid); if(!el) return;
+  const html=reactionsHtml({id:mid, reactions:list});
+  const row=el.querySelector('.reactions');
+  if(!html){ if(row) row.remove(); return; }
+  if(row){ row.outerHTML=html; }
+  else{
+    const br=el.querySelector('br'); const tmp=document.createElement('div'); tmp.innerHTML=html;
+    el.querySelector('div').insertBefore(tmp.firstChild, br);
+  }
+}
+async function refreshReactions(){
+  if(mode!=='live') return;
+  const ids=[...log.querySelectorAll('.msg')].map(el=>Number(el.dataset.mid)).filter(Boolean).slice(-100);
+  if(!ids.length) return;
+  try{
+    const r=await fetch(base+'/api/reactions?ids='+ids.join(','),{headers:{'X-API-Key':apiKey}});
+    if(!r.ok) return;
+    const j=await r.json();
+    for(const [mid, list] of Object.entries(j.reactions||{})){
+      const mm=msgCache.get(Number(mid)); if(mm) mm.reactions=list;
+      updateReactionsRow(Number(mid), list);
+    }
+  }catch(e){}
 }
 async function loadParticipants(){
   try{
@@ -243,6 +411,7 @@ async function fetchLive(){
     if(!r.ok){statusEl.innerHTML='<span class="err">Live gagal: HTTP '+r.status+' — cek URL / key.</span>';return;}
     const j=await r.json();
     j.messages.forEach(m=>{addMsg(m, me && m.author_id===me.id); lastId=Math.max(lastId,m.id);});
+    await refreshReactions();
   }catch(e){statusEl.innerHTML='<span class="err">Tidak bisa reach server: '+escapeHtml(e.message)+'</span>';}
 }
 function readFileAsBase64(file){return new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(file);});}
@@ -329,20 +498,33 @@ document.getElementById('attach').addEventListener('change', async e=>{
     document.getElementById('attachLine').textContent='📎 Terlampir: '+f.name+' ('+fmtSize(f.size)+') — akan di-upload saat Kirim.';
   }
 });
-document.getElementById('demoBtn').onclick=()=>{mode='demo'; clearInterval(timer); statusEl.innerHTML='<span class="ok">Mode Demo aktif.</span>'; meLine.textContent='Demo: pesan hanya di browser ini.'; log.innerHTML=''; participants=[{id:'anggara',name:'Anggara',role:'owner',color:'#2563eb'},{id:'leona',name:'Leona',role:'muse',color:'#ec4899'},{id:'muse2',name:'Muse Lain',role:'muse',color:'#7c3aed'}]; renderChips();
-  [{id:1,author_id:'leona',author:'Leona',color:'#ec4899',text:'Hai Sayang! Ini mode demo 💕',ts:new Date().toISOString()},{id:2,author_id:'anggara',author:'Anggara',color:'#2563eb',text:'Coba tampilan v2: ada avatar, attach file, sama panel owner.',ts:new Date().toISOString()}].forEach(m=>addMsg(m,false));};
+function showChat(){
+  document.getElementById('setupView').style.display='none';
+  document.getElementById('chatView').style.display='flex';
+  document.getElementById('navAdd').style.display = (me && me.role==='owner') ? '' : 'none';
+  unreadNew=0; updateNewMsgBtn();
+}
+function showSetup(){
+  clearInterval(timer); mode='none'; closeSheets();
+  document.getElementById('chatView').style.display='none';
+  document.getElementById('setupView').style.display='';
+}
+document.getElementById('demoBtn').onclick=()=>{mode='demo'; clearInterval(timer); statusEl.innerHTML='<span class="ok">Mode Demo aktif.</span>'; meLine.textContent='Demo: pesan hanya di browser ini.'; log.innerHTML=''; msgCache.clear(); participants=[{id:'anggara',name:'Anggara',role:'owner',color:'#2563eb'},{id:'leona',name:'Leona',role:'muse',color:'#ec4899'},{id:'muse2',name:'Muse Lain',role:'muse',color:'#7c3aed'}]; renderChips();
+  [{id:1,author_id:'leona',author:'Leona',color:'#ec4899',text:'Hai Sayang! Ini mode demo 💕',ts:new Date().toISOString()},{id:2,author_id:'anggara',author:'Anggara',color:'#2563eb',text:'Coba tampilan v2: ada avatar, attach file, sama panel owner.',ts:new Date().toISOString()}].forEach(m=>addMsg(m,false));
+  me={id:'anggara',name:'Anggara',role:'owner'}; showChat();};
 document.getElementById('connectBtn').onclick=async()=>{
   base=document.getElementById('url').value.replace(/\/$/,''); apiKey=document.getElementById('key').value.trim();
   if(!apiKey){alert('Isi API key dulu');return;}
   try{
     const r=await fetch(base+'/api/me',{headers:{'X-API-Key':apiKey}});
     if(!r.ok){statusEl.innerHTML='<span class="err">Key ditolak (HTTP '+r.status+'). Cek lagi key-nya.</span>';return;}
-    me=await r.json(); mode='live'; lastId=0; log.innerHTML='';
+    me=await r.json(); mode='live'; lastId=0; log.innerHTML=''; msgCache.clear();
     await loadParticipants();
     try{ const hr=await fetch(base+'/api/health'); if(hr.ok){ const hj=await hr.json(); r2Enabled=!!hj.r2_enabled; r2MaxMb=Number(hj.r2_max_mb)||100; diskEnabled=!!hj.disk_enabled; diskMaxMb=Number(hj.disk_max_mb)||100; } }catch(e){}
     statusEl.innerHTML='<span class="ok">Tersambung sebagai '+escapeHtml(me.name)+' ('+escapeHtml(me.role)+').</span>'+(r2Enabled?' <span class="ok">R2 aktif — file s.d. '+r2MaxMb+' MB.</span>':(diskEnabled?' <span class="ok">Upload disk aktif — file s.d. '+diskMaxMb+' MB.</span>':' <span class="muted">Upload besar nonaktif — file max 4 MB.</span>'));
     meLine.textContent='Kamu: '+me.name+' — pesanmu akan tercatat sebagai '+me.name+', tidak bisa menyamar jadi orang lain.';
     document.getElementById('adminCard').style.display = me.role==='owner' ? '' : 'none';
+    showChat();
     await fetchLive(); clearInterval(timer); timer=setInterval(fetchLive,3000);
   }catch(e){statusEl.innerHTML='<span class="err">Tidak bisa reach server: '+escapeHtml(e.message)+'</span>';}
 };
@@ -351,7 +533,7 @@ async function send(){
   if(mode!=='live' && mode!=='demo'){alert('Sambungkan dulu (Live) atau pilih Mode Demo.');return;}
   if(!t && !pendingFile) return;
   document.getElementById('text').value='';
-  if(mode==='demo'){addMsg({id:Date.now(),author_id:me?me.id:'anggara',author:me?me.name:'Anggara',color:'#2563eb',text:t,ts:new Date().toISOString()},true); pendingFile=null; document.getElementById('attachLine').textContent=''; return;}
+  if(mode==='demo'){addMsg({id:Date.now(),author_id:me?me.id:'anggara',author:me?me.name:'Anggara',color:'#2563eb',text:t,ts:new Date().toISOString(),reply_to:pendingReply?{id:pendingReply.id,author:pendingReply.author,text:pendingReply.text}:null,reactions:[]},true); pendingFile=null; document.getElementById('attachLine').textContent=''; clearReply(); return;}
   let fileId=null;
   if(pendingFile){
     try{
@@ -367,19 +549,146 @@ async function send(){
     }catch(err){ setUploadProgress(null); alert('Upload gagal: '+err.message); return; }
     pendingFile=null; document.getElementById('attachLine').textContent='';
   }
-  const r=await fetch(base+'/api/messages',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({text:t,file_id:fileId})});
+  const body={text:t,file_id:fileId};
+  if(pendingReply) body.reply_to=pendingReply.id;
+  const r=await fetch(base+'/api/messages',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!r.ok){alert('Gagal kirim: HTTP '+r.status);return;}
+  clearReply();
   await fetchLive();
 }
 document.getElementById('sendBtn').onclick=send;
 document.getElementById('text').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
+/* ---- bottom sheet ---- */
+function openSheet(id){ closeSheets(); document.getElementById('sheetBackdrop').style.display=''; document.getElementById(id).classList.add('open'); if(id==='sheetProfile') fillProfileSheet(); }
+function closeSheets(){
+  document.getElementById('sheetBackdrop').style.display='none';
+  for(const s of document.querySelectorAll('.sheet')) s.classList.remove('open');
+  const kb=document.getElementById('newKeyBox');
+  if(kb){ kb.style.display='none'; document.getElementById('newKeyText').textContent=''; }
+}
+document.getElementById('sheetBackdrop').onclick=closeSheets;
+document.querySelectorAll('.sheet-close').forEach(b=>b.onclick=closeSheets);
+document.getElementById('navChat').onclick=()=>{ closeSheets(); log.scrollTop=log.scrollHeight; unreadNew=0; updateNewMsgBtn(); };
+document.getElementById('navAdd').onclick=()=>{ if(me && me.role==='owner') openSheet('sheetAdd'); };
+document.getElementById('navProfile').onclick=()=>openSheet('sheetProfile');
+document.getElementById('navInfo').onclick=()=>openSheet('sheetInfo');
+document.getElementById('infoBtn').onclick=()=>openSheet('sheetInfo');
+document.getElementById('leaveBtn').onclick=showSetup;
+document.getElementById('disconnectBtn').onclick=showSetup;
+/* ---- reply ---- */
+function setReplyTarget(mid){
+  const mm=msgCache.get(mid); if(!mm) return;
+  pendingReply={id:mm.id, author:mm.author, text:mm.text||''};
+  document.getElementById('replyBarText').innerHTML='↩ Membalas <b>'+escapeHtml(mm.author)+'</b>: '+escapeHtml((mm.text||'').slice(0,80));
+  document.getElementById('replyBar').style.display='flex';
+  document.getElementById('text').focus();
+}
+function clearReply(){ pendingReply=null; document.getElementById('replyBar').style.display='none'; }
+document.getElementById('replyCancel').onclick=clearReply;
+/* ---- long-press: sheet aksi pesan (reaksi + balas) ---- */
+function openMsgSheet(mid){
+  actionMsgId=mid;
+  const mm=msgCache.get(mid);
+  const mine=(mm&&mm.reactions||[]).find(r=>r.by_me);
+  document.getElementById('reactRow').innerHTML=REACT_EMOJIS.map(em=>'<button class="react-pick'+(mine&&mine.emoji===em?' mine':'')+'" data-emoji="'+em+'">'+em+'</button>').join('');
+  document.getElementById('msgSheetTitle').textContent = mm ? ('Pesan #'+mid+' • '+mm.author) : ('Pesan #'+mid);
+  openSheet('sheetMsg');
+}
+let pressTimer=null, pressMid=null, pressX=0, pressY=0;
+log.addEventListener('pointerdown', e=>{
+  const el=e.target.closest('.msg'); if(!el) return;
+  if(e.target.closest('.react-chip')||e.target.closest('.quote')||e.target.closest('a')) return;
+  pressMid=Number(el.dataset.mid); pressX=e.clientX; pressY=e.clientY;
+  pressTimer=setTimeout(()=>{ pressTimer=null; openMsgSheet(pressMid); }, 550);
+});
+log.addEventListener('pointermove', e=>{
+  if(pressTimer && Math.hypot(e.clientX-pressX, e.clientY-pressY)>10){ clearTimeout(pressTimer); pressTimer=null; }
+});
+['pointerup','pointercancel'].forEach(ev=>log.addEventListener(ev, ()=>{ if(pressTimer){clearTimeout(pressTimer); pressTimer=null;} }));
+log.addEventListener('contextmenu', e=>{ if(e.target.closest('.msg')) e.preventDefault(); });
+log.addEventListener('click', e=>{
+  const chip=e.target.closest('.react-chip');
+  if(chip){ toggleReaction(Number(chip.dataset.mid), chip.dataset.emoji); return; }
+  const q=e.target.closest('.quote');
+  if(q){
+    const target=document.getElementById('msg-'+q.dataset.replyTo);
+    if(target){ target.scrollIntoView({behavior:'smooth',block:'center'}); target.classList.add('flash'); setTimeout(()=>target.classList.remove('flash'),1200); }
+    return;
+  }
+});
+document.getElementById('reactRow').addEventListener('click', e=>{
+  const b=e.target.closest('.react-pick'); if(!b) return;
+  closeSheets(); toggleReaction(actionMsgId, b.dataset.emoji);
+});
+document.getElementById('msgReplyBtn').onclick=()=>{ closeSheets(); setReplyTarget(actionMsgId); };
+/* ---- reactions ---- */
+async function toggleReaction(mid, emoji){
+  if(mode==='demo'){
+    const cur=(msgCache.get(mid)&&msgCache.get(mid).reactions)||[];
+    const mine=cur.find(r=>r.by_me);
+    let next;
+    if(mine && mine.emoji===emoji) next=cur.filter(r=>!r.by_me);
+    else if(mine) next=[{emoji:emoji,count:1,by_me:true}];
+    else next=[...cur, {emoji:emoji,count:1,by_me:true}];
+    const mm=msgCache.get(mid); if(mm) mm.reactions=next;
+    updateReactionsRow(mid, next);
+    return;
+  }
+  if(mode!=='live') return;
+  try{
+    const r=await fetch(base+'/api/messages/'+mid+'/reactions',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({emoji})});
+    if(!r.ok) return;
+    const j=await r.json();
+    const mm=msgCache.get(mid); if(mm) mm.reactions=j.reactions||[];
+    updateReactionsRow(mid, j.reactions||[]);
+  }catch(e){}
+}
+/* ---- profil sendiri ---- */
+function fillProfileSheet(){
+  if(!me) return;
+  document.getElementById('myName').value=me.name;
+  document.getElementById('myProfileName').textContent=me.name;
+  document.getElementById('myProfileRole').textContent='Peran: '+me.role+' • id: '+me.id;
+  document.getElementById('myAvatarPreview').innerHTML=avatarHtml(me,true);
+  document.getElementById('profileMsg').textContent = me.role==='owner' ? 'Kamu owner — bisa ganti nama & foto profil sendiri di sini.' : 'Nama & foto profil hanya bisa diganti owner. Minta owner menggantinya lewat panel owner.';
+  document.getElementById('saveProfileNameBtn').disabled = me.role!=='owner';
+  document.getElementById('saveProfilePfpBtn').disabled = me.role!=='owner';
+}
+document.getElementById('saveProfileNameBtn').onclick=async()=>{
+  const name=document.getElementById('myName').value.trim(); if(!name){alert('Isi nama dulu');return;}
+  const r=await fetch(base+'/api/admin/participants/'+encodeURIComponent(me.id),{method:'PATCH',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({name})});
+  const j=await r.json();
+  if(r.ok){ me.name=j.participant.name; await loadParticipants(); fillProfileSheet(); }
+  document.getElementById('profileMsg').textContent = r.ok ? 'Nama diganti jadi '+j.participant.name+'.' : 'Gagal: '+(j.error||r.status);
+};
+document.getElementById('saveProfilePfpBtn').onclick=async()=>{
+  const f=document.getElementById('myPfpFile').files[0]; if(!f){alert('Pilih gambar dulu');return;}
+  if(f.size>1024*1024){alert('Pfp max 1 MB');return;}
+  const b64=await readFileAsBase64(f);
+  const r=await fetch(base+'/api/admin/participants/'+encodeURIComponent(me.id)+'/avatar',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({mime:f.type,data_base64:b64})});
+  const j=await r.json();
+  if(r.ok){ await loadParticipants(); fillProfileSheet(); }
+  document.getElementById('profileMsg').textContent = r.ok ? 'Foto profil dipasang.' : 'Gagal: '+(j.error||r.status);
+};
+/* ---- admin ---- */
 document.getElementById('addUserBtn').onclick=async()=>{
   const name=document.getElementById('newName').value.trim(); if(!name){alert('Isi nama dulu');return;}
   const r=await fetch(base+'/api/admin/participants',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({name})});
   const j=await r.json();
-  if(!r.ok){document.getElementById('newKeyLine').textContent='Gagal: '+(j.error||r.status);return;}
-  document.getElementById('newKeyLine').textContent='User baru: '+j.participant.name+' (id: '+j.participant.id+'). Key-nya (SIMPAN SEKARANG, hanya tampil sekali): '+j.api_key;
+  const box=document.getElementById('newKeyBox');
+  if(!r.ok){ box.style.display='none'; document.getElementById('newKeyLine').textContent='Gagal: '+(j.error||r.status); return; }
+  document.getElementById('newKeyLine').textContent='User baru: '+j.participant.name+' (id: '+j.participant.id+').';
+  document.getElementById('newKeyText').textContent=j.api_key;
+  box.style.display='block';
   document.getElementById('newName').value=''; await loadParticipants();
+};
+document.getElementById('copyKeyBtn').onclick=async()=>{
+  const k=document.getElementById('newKeyText').textContent; if(!k) return;
+  try{ await navigator.clipboard.writeText(k); }catch(e){
+    const ta=document.createElement('textarea'); ta.value=k; document.body.appendChild(ta); ta.select();
+    try{document.execCommand('copy');}catch(_){} ta.remove();
+  }
+  const b=document.getElementById('copyKeyBtn'); b.textContent='Disalin ✓'; setTimeout(()=>b.textContent='📋 Salin',1500);
 };
 document.getElementById('renameBtn').onclick=async()=>{
   const id=document.getElementById('renameId').value, name=document.getElementById('renameName').value.trim(); if(!name){alert('Isi nama baru');return;}
