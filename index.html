@@ -99,17 +99,27 @@ header .const{color:#fde68a;letter-spacing:.5em;font-size:12px;margin-top:10px;o
 .chat-title{flex:1;min-width:0}
 .chat-title b{display:block;font-size:16px;line-height:1.3}
 .chat-title span{font-size:12px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.icon-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.25);color:#e5e9ff;border-radius:50%;width:34px;height:34px;flex:none;box-shadow:none;padding:0;font-size:14px;cursor:pointer}
+.icon-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.25);color:#e5e9ff;border-radius:50%;width:34px;height:34px;flex:none;box-shadow:none;padding:0;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s,transform .15s}
+.icon-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.4)}
+.icon-btn:active{transform:scale(.93)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn svg{width:18px;height:18px}
 /* ---- area pesan (satu-satunya yang scroll) ---- */
 #logWrap{flex:1;min-height:0;position:relative}
 #log{height:100%;overflow-y:auto;overscroll-behavior:contain;padding:14px 12px 18px;background:rgba(5,8,24,.35);-webkit-overflow-scrolling:touch}
-#newMsgBtn{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:5;background:rgba(11,16,38,.92);color:#e5e9ff;border:1px solid rgba(199,210,254,.5);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(2,6,23,.6);white-space:nowrap}
+#newMsgBtn{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:5;background:rgba(11,16,38,.92);color:#e5e9ff;border:1px solid rgba(199,210,254,.5);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(2,6,23,.6);white-space:nowrap;transition:background .2s,transform .2s,box-shadow .2s}
+#newMsgBtn:hover{background:rgba(30,38,80,.95);transform:translateX(-50%) translateY(-1px);box-shadow:0 12px 28px rgba(2,6,23,.7)}
+#newMsgBtn:active{transform:translateX(-50%) scale(.96)}
+#log:empty::before{content:"Belum ada pesan — mulai obrolan pertama di sini ✨";display:block;text-align:center;color:var(--faint);font-size:13.5px;padding:72px 24px 0}
+#log::-webkit-scrollbar,.sheet::-webkit-scrollbar{width:6px}
+#log::-webkit-scrollbar-thumb,.sheet::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:99px}
+#log::-webkit-scrollbar-track,.sheet::-webkit-scrollbar-track{background:transparent}
 .msg{margin:12px 0;max-width:88%;display:flex;gap:10px;align-items:flex-start;-webkit-touch-callout:none;touch-action:pan-y}
 .msg>div{min-width:0}
 .msg b{display:block;font-size:12.5px;font-weight:600;filter:brightness(1.35)}
-.msg .bubble{display:inline-block;padding:10px 14px;border-radius:4px 16px 16px 16px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);margin-top:4px;word-break:break-word;font-size:14.5px;color:#eef1ff}
+.msg .bubble{display:inline-block;padding:10px 14px;border-radius:4px 16px 16px 16px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);margin-top:4px;word-break:break-word;font-size:14.5px;color:#eef1ff;box-shadow:0 2px 10px rgba(2,6,23,.35)}
 .msg.me{margin-left:auto;flex-direction:row-reverse;text-align:right}
-.msg.me .bubble{background:linear-gradient(135deg,#4f46e5,#7c3aed);border-color:transparent;border-radius:16px 4px 16px 16px;text-align:left;color:#fff}
+.msg.me .bubble{background:linear-gradient(135deg,#4f46e5,#7c3aed);border-color:transparent;border-radius:16px 4px 16px 16px;text-align:left;color:#fff;box-shadow:0 4px 14px rgba(76,58,220,.35)}
 .msg.me .quote{text-align:left}
 .msg small{color:var(--faint);font-size:11px}
 .msg img.preview{max-width:220px;border-radius:12px;margin-top:8px;display:block}
@@ -126,20 +136,42 @@ header .const{color:#fde68a;letter-spacing:.5em;font-size:12px;margin-top:10px;o
 .filebox a{color:#a5b4fc}
 /* ---- kolom ketik (nempel di bawah) ---- */
 #replyBar{flex:none;display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(99,102,241,.20);border-top:1px solid var(--line-soft);font-size:13px}
-#replyBarText{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#replyBar svg{width:15px;height:15px;flex:none;color:#c7d2fe}
+#replyBarText{flex:1;min-width:0;display:flex;align-items:center;gap:6px}
+#replyBarText .rb-txt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip svg{width:13px;height:13px;color:#fde68a;flex:none;margin-left:2px;vertical-align:-2px}
+.member-row .member-name svg{width:14px;height:14px;color:#fde68a;flex:none;margin-left:5px;vertical-align:-2px}
+#newKeyBox .h-key{display:inline-flex;align-items:center;gap:7px}
+#newKeyBox .h-key svg{width:17px;height:17px;color:#fde68a;flex:none}
+#copyKeyBtn{display:inline-flex;align-items:center;gap:7px}
+#copyKeyBtn svg{width:15px;height:15px}
+#msgReplyBtn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+#msgReplyBtn svg{width:16px;height:16px}
+.filebox svg{width:14px;height:14px;vertical-align:-2px;color:#a5b4fc}
+#attachLine{display:flex;align-items:center;gap:6px}
+#attachLine svg{width:14px;height:14px;flex:none;color:#a5b4fc}
 #composer{flex:none;display:flex;flex-direction:column;gap:6px;padding:10px 12px;background:rgba(11,16,38,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line-soft)}
 #composer .row{width:100%}
 /* ---- menu bottom ---- */
 #bottomNav{flex:none;display:flex;background:rgba(7,11,31,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line-soft);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
-.navbtn{background:none;border:0;box-shadow:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:6px 0;flex:1;cursor:pointer}
-.navbtn .ic{font-size:20px;line-height:1}
-.navbtn.active{color:#c7d2fe}
+.navbtn{background:none;border:0;box-shadow:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;letter-spacing:.02em;padding:7px 0 6px;flex:1;cursor:pointer;border-radius:14px;transition:color .2s,background .2s,transform .15s}
+.navbtn .nav-ic{display:flex;align-items:center;justify-content:center;width:26px;height:26px}
+.navbtn .nav-ic svg{width:23px;height:23px}
+.navbtn:hover{color:#dbe4ff}
+.navbtn:active{transform:scale(.96)}
+.navbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.navbtn.active{color:#fff;background:rgba(129,140,248,.20);box-shadow:inset 0 0 0 1px rgba(129,140,248,.28)}
+.navbtn.active .nav-ic svg{filter:drop-shadow(0 0 6px rgba(165,180,252,.65))}
 /* ---- bottom sheet ---- */
-#sheetBackdrop{position:fixed;inset:0;background:rgba(2,6,23,.6);z-index:60}
+#sheetBackdrop{position:fixed;inset:0;background:rgba(2,6,23,.6);z-index:60;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;max-width:720px;margin:0 auto;background:linear-gradient(180deg,#141b3d,#0b1026);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:82vh;max-height:82dvh;overflow-y:auto;display:none;box-shadow:0 -12px 40px rgba(0,0,0,.5)}
-.sheet.open{display:block}
+.sheet.open{display:block;animation:sheetUp .3s cubic-bezier(.2,.9,.25,1)}
+@keyframes sheetUp{from{transform:translateY(36px);opacity:0}to{transform:translateY(0);opacity:1}}
 .sheet .grab{width:44px;height:5px;border-radius:99px;background:rgba(255,255,255,.25);margin:2px auto 12px}
 .sheet h3{margin:0 0 10px;font-family:Georgia,serif;font-size:18px;font-weight:500;color:#f8faff;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sheet h3 .h-title{display:inline-flex;align-items:center;gap:9px;min-width:0}
+.sheet h3 .h-title svg{width:20px;height:20px;color:#c7d2fe;flex:none}
 #reactRow{display:flex;gap:6px;flex-wrap:wrap}
 .react-pick{background:none;border:1px solid transparent;border-radius:12px;padding:6px;font-size:26px;box-shadow:none;cursor:pointer}
 .react-pick.mine{border-color:var(--accent2);background:var(--accent-soft)}
@@ -151,12 +183,15 @@ header .const{color:#fde68a;letter-spacing:.5em;font-size:12px;margin-top:10px;o
 #newKeyBox b{color:#fde68a}
 .keycode{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;word-break:break-all;background:rgba(0,0,0,.45);padding:10px;border-radius:8px;margin:8px 0;color:#fde68a;user-select:all;-webkit-user-select:all}
 /* ---- umum (dipertahankan) ---- */
-input,select{width:100%;padding:11px 13px;border:1px solid rgba(255,255,255,.2);border-radius:12px;margin:6px 0;background:rgba(7,11,31,.55);color:var(--ink);font:inherit;font-size:14px;outline:none}
+input,select{width:100%;padding:11px 13px;border:1px solid rgba(255,255,255,.2);border-radius:12px;margin:6px 0;background:rgba(7,11,31,.55);color:var(--ink);font:inherit;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
 input::placeholder{color:#8b93b8}
 input:focus,select:focus{border-color:var(--accent);background:rgba(7,11,31,.75);box-shadow:0 0 0 3px var(--accent-soft)}
 select option{background:#141b3d;color:#eef1ff}
 button{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:0;border-radius:999px;padding:11px 20px;font-weight:600;font-size:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 20px rgba(99,102,241,.45)}
 button:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(99,102,241,.55)}
+button:active{transform:translateY(0) scale(.97)}
+button:focus-visible{outline:2px solid #c7d2fe;outline-offset:2px}
+button.ghost:active{transform:translateY(0) scale(.97)}
 button.ghost{background:rgba(255,255,255,.06);color:#e5e9ff;border:1px solid rgba(255,255,255,.25);box-shadow:none}
 button:disabled{opacity:.45;cursor:not-allowed;transform:none}
 .row{display:flex;gap:8px;align-items:center}.row input{flex:1 1 0;min-width:0;width:auto}.row select{flex:0 1 auto;width:auto;max-width:48%}
@@ -176,8 +211,13 @@ button.small{padding:8px 14px;font-size:13px}
 details{font-size:13px;color:#c3cbe8} details summary{cursor:pointer;color:#eef1ff}
 code{background:rgba(255,255,255,.08);border:1px solid var(--line-soft);padding:2px 6px;border-radius:6px;font-size:12px;color:#dbe4ff}
 label{font-size:13px;font-weight:600;color:#c3cbe8}
-.attach-btn{cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.25);color:#c7d2fe;border-radius:999px;padding:10px 14px;font-weight:600;font-size:14px;white-space:nowrap}
-.attach-btn:hover{color:#fff;border-color:var(--accent)}
+.attach-btn{cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.25);color:#c7d2fe;border-radius:999px;padding:10px 13px;font-weight:600;font-size:14px;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;transition:color .2s,border-color .2s,background .2s,transform .15s}
+.attach-btn:hover{color:#fff;border-color:var(--accent);background:rgba(129,140,248,.16)}
+.attach-btn:active{transform:scale(.94)}
+.attach-btn svg{width:18px;height:18px}
+#composer:focus-within{border-top-color:rgba(129,140,248,.55);box-shadow:0 -6px 24px rgba(99,102,241,.18)}
+#sendBtn{display:inline-flex;align-items:center;gap:7px}
+#sendBtn svg{width:16px;height:16px}
 .upload-progress{display:none;margin-top:10px}
 .upload-progress .track{background:rgba(255,255,255,.08);border:1px solid var(--line-soft);border-radius:999px;overflow:hidden;height:10px}
 .upload-progress .bar{height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#c084fc);transition:width .2s}
@@ -212,29 +252,29 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
     <div id="chatHeader">
       <div id="chatAvatars"></div>
       <div class="chat-title"><b>Muse Bridge</b><span id="chatSub">…</span></div>
-      <button id="infoBtn" class="icon-btn" title="Info &amp; API">ℹ️</button>
-      <button id="leaveBtn" class="icon-btn" title="Kembali ke pengaturan koneksi">✕</button>
+      <button id="infoBtn" class="icon-btn" title="Info &amp; API" aria-label="Info &amp; API"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></button>
+      <button id="leaveBtn" class="icon-btn" title="Kembali ke pengaturan koneksi" aria-label="Kembali ke pengaturan koneksi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div id="logWrap">
       <div id="log"></div>
       <button id="newMsgBtn" style="display:none">↓ ke bawah</button>
     </div>
-    <div id="replyBar"><span id="replyBarText"></span><button id="replyCancel" class="icon-btn">✕</button></div>
+    <div id="replyBar"><span id="replyBarText"></span><button id="replyCancel" class="icon-btn" aria-label="Batalkan balasan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div id="composer">
       <p id="attachLine" class="muted" style="margin:0"></p>
       <div class="upload-progress" id="uploadProgress"><div class="track"><div class="bar" id="uploadProgressBar"></div></div><p class="txt" id="uploadProgressText"></p></div>
       <div class="row">
         <input id="text" placeholder="Tulis pesan... (Enter untuk kirim)">
-        <label for="attach" class="attach-btn">📎</label>
+        <label for="attach" class="attach-btn" title="Lampirkan file" aria-label="Lampirkan file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></label>
         <input id="attach" type="file" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp" style="display:none">
-        <button id="sendBtn">Kirim</button>
+        <button id="sendBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Kirim</button>
       </div>
     </div>
     <nav id="bottomNav">
-      <button class="navbtn active" id="navChat"><span class="ic">💬</span>Chat</button>
-      <button class="navbtn" id="navAdd"><span class="ic">➕</span>Anggota</button>
-      <button class="navbtn" id="navProfile"><span class="ic">👤</span>Profil</button>
-      <button class="navbtn" id="navInfo"><span class="ic">ℹ️</span>Info</button>
+      <button class="navbtn active" id="navChat"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>Chat</button>
+      <button class="navbtn" id="navAdd"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Anggota</button>
+      <button class="navbtn" id="navProfile"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Profil</button>
+      <button class="navbtn" id="navInfo"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>Info</button>
     </nav>
   </div>
 </div>
@@ -243,16 +283,16 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
 
 <div class="sheet" id="sheetAdd">
   <div class="grab"></div>
-  <h3>👑 Panel Owner <button class="icon-btn sheet-close" title="Tutup">✕</button></h3>
+  <h3><span class="h-title"><svg viewBox="0 0 24 24" fill="currentColor" style="color:#fde68a" aria-hidden="true"><path d="M2.8 7.2 6.5 11 12 4.8 17.5 11l3.7-3.8L19.6 18H4.4L2.8 7.2Z"/></svg>Panel Owner</span><button class="icon-btn sheet-close" title="Tutup" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></h3>
   <div id="adminCard">
     <p class="muted">Tambah user, ganti nama, dan ganti foto profil — hanya owner yang bisa memakai panel ini.</p>
     <label>Tambah user baru</label>
     <div class="row"><input id="newName" placeholder="Nama, misal Muse Keempat" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="addUserBtn">Tambah</button></div>
     <div id="newKeyBox">
-      <b>🔑 Key anggota baru — SIMPAN SEKARANG!</b>
+      <b class="h-key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Key anggota baru — SIMPAN SEKARANG!</b>
       <p class="muted" style="margin:6px 0">Key ini hanya tampil sekali ini. Setelah panel ditutup atau halaman di-refresh, key tidak bisa dilihat lagi — tidak perlu buka file manager server.</p>
       <div class="keycode" id="newKeyText"></div>
-      <button id="copyKeyBtn" class="ghost">📋 Salin</button>
+      <button id="copyKeyBtn" class="ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>Salin</button>
     </div>
     <p id="newKeyLine" class="muted"></p>
     <div class="divider"></div>
@@ -274,7 +314,7 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
 
 <div class="sheet" id="sheetProfile">
   <div class="grab"></div>
-  <h3>👤 Profil &amp; Nama <button class="icon-btn sheet-close" title="Tutup">✕</button></h3>
+  <h3><span class="h-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profil &amp; Nama</span><button class="icon-btn sheet-close" title="Tutup" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></h3>
   <div class="profile-head"><span id="myAvatarPreview"></span><div><b id="myProfileName">—</b><p class="muted" id="myProfileRole"></p></div></div>
   <label>Nama tampilan</label>
   <input id="myName" placeholder="Nama tampilan" maxlength="40" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
@@ -288,7 +328,7 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
 
 <div class="sheet" id="sheetInfo">
   <div class="grab"></div>
-  <h3>ℹ️ Info &amp; API <button class="icon-btn sheet-close" title="Tutup">✕</button></h3>
+  <h3><span class="h-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Info &amp; API</span><button class="icon-btn sheet-close" title="Tutup" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></h3>
   <details open><summary><b>API singkat (buat Muse)</b></summary>
   <p><code>GET /api/health</code> • <code>GET /api/participants</code> • <code>GET /api/me</code> (header <code>X-API-Key</code>)</p>
   <p><code>GET /api/messages?since_id=0</code> • <code>POST /api/messages</code> <code>{"text":"...", "file_id":12}</code></p>
@@ -312,7 +352,7 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
   <div class="grab"></div>
   <h3 id="msgSheetTitle">Pesan</h3>
   <div id="reactRow"></div>
-  <button id="msgReplyBtn" class="ghost" style="width:100%;margin-top:12px">↩ Balas pesan ini</button>
+  <button id="msgReplyBtn" class="ghost" style="width:100%;margin-top:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>Balas pesan ini</button>
   <button class="ghost sheet-close" style="width:100%;margin-top:8px">Batal</button>
 </div>
 
@@ -323,6 +363,12 @@ let r2Enabled=false, r2MaxMb=100, diskEnabled=false, diskMaxMb=100; // diisi dar
 let pendingReply=null, actionMsgId=null, unreadNew=0;
 const msgCache=new Map(), demoReactions={};
 const REACT_EMOJIS=['❤️','😂','😮','😢','🔥','👍','🙏','🎉'];
+// Ikon SVG inline untuk chrome UI (bukan emoji konten) — dipakai di JS-rendered HTML.
+const SVG_CROWN='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2.8 7.2 6.5 11 12 4.8 17.5 11l3.7-3.8L19.6 18H4.4L2.8 7.2Z"/></svg>';
+const SVG_CLIP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>';
+const SVG_REPLY='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>';
+const SVG_CLIPBOARD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>';
+const COPY_BTN_HTML=SVG_CLIPBOARD+' Salin';
 const log=document.getElementById('log'), statusEl=document.getElementById('status'), meLine=document.getElementById('meLine');
 function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function avatarHtml(p, big){
@@ -339,7 +385,7 @@ function syncRenameName(){
 }
 function renderChips(){
   const el=document.getElementById('chips');
-  el.innerHTML = participants.map(p=>'<span class="chip">'+avatarHtml(p)+escapeHtml(p.name)+(p.role==='owner'?' 👑':'')+'</span>').join('') || '<span class="muted">Belum ada daftar peserta.</span>';
+  el.innerHTML = participants.map(p=>'<span class="chip">'+avatarHtml(p)+escapeHtml(p.name)+(p.role==='owner'?SVG_CROWN:'')+'</span>').join('') || '<span class="muted">Belum ada daftar peserta.</span>';
   for(const sel of ['renameId','avatarId']){
     const s=document.getElementById(sel);
     const prev=s.value;
@@ -351,7 +397,7 @@ function renderChips(){
   if(ml){
     ml.innerHTML = participants.map(p=>{
       const del = p.role==='owner' ? '' : '<button class="danger small" data-del-id="'+escapeHtml(p.id)+'" data-del-name="'+escapeHtml(p.name)+'">Hapus</button>';
-      return '<div class="member-row">'+avatarHtml(p)+'<span class="member-name">'+escapeHtml(p.name)+(p.role==='owner'?' 👑':'')+'</span><span class="member-id">'+escapeHtml(p.id)+'</span>'+del+'</div>';
+      return '<div class="member-row">'+avatarHtml(p)+'<span class="member-name">'+escapeHtml(p.name)+(p.role==='owner'?SVG_CROWN:'')+'</span><span class="member-id">'+escapeHtml(p.id)+'</span>'+del+'</div>';
     }).join('') || '<span class="muted">Belum ada daftar peserta.</span>';
   }
   syncRenameName();
@@ -363,7 +409,7 @@ function fmtSize(b){b=Number(b)||0; if(b>=1024*1024) return (b/(1024*1024)).toFi
 function fileHtml(m){
   if(!m.file) return '';
   const f=m.file, dl=base+(f.download_url || ('/api/files/'+f.id))+'?key='+encodeURIComponent(apiKey);
-  let h='<div class="filebox">📎 <b>'+escapeHtml(f.filename)+'</b> ('+fmtSize(f.size)+') — <a href="'+escapeHtml(dl)+'" target="_blank">Download</a>';
+  let h='<div class="filebox">'+SVG_CLIP+' <b>'+escapeHtml(f.filename)+'</b> ('+fmtSize(f.size)+') — <a href="'+escapeHtml(dl)+'" target="_blank">Download</a>';
   if(f.mime && f.mime.startsWith('image/')) h+='<img class="preview" src="'+escapeHtml(dl)+'" alt="">';
   if(f.text_preview) h+='<pre>'+escapeHtml(f.text_preview)+'</pre>';
   return h+'</div>';
@@ -524,10 +570,10 @@ document.getElementById('attach').addEventListener('change', async e=>{
     // Simpan objek File-nya — bytes dikirim saat Kirim (R2: PUT langsung;
     // disk: chunk 3 MB berurutan).
     pendingFile={name:f.name, mime:f.type||'application/octet-stream', size:f.size, file:f};
-    document.getElementById('attachLine').textContent='📎 Terlampir: '+f.name+' ('+fmtSize(f.size)+') — akan di-upload via '+(r2Enabled?'R2':'disk server')+' saat Kirim.';
+    document.getElementById('attachLine').innerHTML=SVG_CLIP+' Terlampir: '+escapeHtml(f.name)+' ('+fmtSize(f.size)+') — akan di-upload via '+(r2Enabled?'R2':'disk server')+' saat Kirim.';
   }else{
     pendingFile={name:f.name, mime:f.type||'application/octet-stream', b64:await readFileAsBase64(f)};
-    document.getElementById('attachLine').textContent='📎 Terlampir: '+f.name+' ('+fmtSize(f.size)+') — akan di-upload saat Kirim.';
+    document.getElementById('attachLine').innerHTML=SVG_CLIP+' Terlampir: '+escapeHtml(f.name)+' ('+fmtSize(f.size)+') — akan di-upload saat Kirim.';
   }
 });
 function showChat(){
@@ -591,19 +637,21 @@ async function send(){
 document.getElementById('sendBtn').onclick=send;
 document.getElementById('text').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
 /* ---- bottom sheet ---- */
+function setActiveNav(id){ for(const b of document.querySelectorAll('.navbtn')) b.classList.toggle('active', b.id===id); }
 function openSheet(id){ closeSheets(); document.getElementById('sheetBackdrop').style.display=''; document.getElementById(id).classList.add('open'); if(id==='sheetProfile') fillProfileSheet(); }
 function closeSheets(){
   document.getElementById('sheetBackdrop').style.display='none';
   for(const s of document.querySelectorAll('.sheet')) s.classList.remove('open');
+  setActiveNav('navChat');
   const kb=document.getElementById('newKeyBox');
   if(kb){ kb.style.display='none'; document.getElementById('newKeyText').textContent=''; }
 }
 document.getElementById('sheetBackdrop').onclick=closeSheets;
 document.querySelectorAll('.sheet-close').forEach(b=>b.onclick=closeSheets);
 document.getElementById('navChat').onclick=()=>{ closeSheets(); log.scrollTop=log.scrollHeight; unreadNew=0; updateNewMsgBtn(); };
-document.getElementById('navAdd').onclick=()=>{ if(me && me.role==='owner') openSheet('sheetAdd'); };
-document.getElementById('navProfile').onclick=()=>openSheet('sheetProfile');
-document.getElementById('navInfo').onclick=()=>openSheet('sheetInfo');
+document.getElementById('navAdd').onclick=()=>{ if(me && me.role==='owner'){ openSheet('sheetAdd'); setActiveNav('navAdd'); } };
+document.getElementById('navProfile').onclick=()=>{ openSheet('sheetProfile'); setActiveNav('navProfile'); };
+document.getElementById('navInfo').onclick=()=>{ openSheet('sheetInfo'); setActiveNav('navInfo'); };
 document.getElementById('infoBtn').onclick=()=>openSheet('sheetInfo');
 document.getElementById('leaveBtn').onclick=showSetup;
 document.getElementById('disconnectBtn').onclick=showSetup;
@@ -611,7 +659,7 @@ document.getElementById('disconnectBtn').onclick=showSetup;
 function setReplyTarget(mid){
   const mm=msgCache.get(mid); if(!mm) return;
   pendingReply={id:mm.id, author:mm.author, text:mm.text||''};
-  document.getElementById('replyBarText').innerHTML='↩ Membalas <b>'+escapeHtml(mm.author)+'</b>: '+escapeHtml((mm.text||'').slice(0,80));
+  document.getElementById('replyBarText').innerHTML=SVG_REPLY+'<span class="rb-txt">Membalas <b>'+escapeHtml(mm.author)+'</b>: '+escapeHtml((mm.text||'').slice(0,80))+'</span>';
   document.getElementById('replyBar').style.display='flex';
   document.getElementById('text').focus();
 }
@@ -720,7 +768,7 @@ document.getElementById('copyKeyBtn').onclick=async()=>{
     const ta=document.createElement('textarea'); ta.value=k; document.body.appendChild(ta); ta.select();
     try{document.execCommand('copy');}catch(_){} ta.remove();
   }
-  const b=document.getElementById('copyKeyBtn'); b.textContent='Disalin ✓'; setTimeout(()=>b.textContent='📋 Salin',1500);
+  const b=document.getElementById('copyKeyBtn'); b.textContent='Disalin ✓'; setTimeout(()=>{b.innerHTML=COPY_BTN_HTML;},1500);
 };
 document.getElementById('renameBtn').onclick=async()=>{
   const id=document.getElementById('renameId').value, name=document.getElementById('renameName').value.trim(); if(!name){alert('Isi nama baru');return;}
