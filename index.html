@@ -301,6 +301,7 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
     <div class="divider"></div>
     <label>Ganti foto profil (pfp) peserta — png/jpg/webp, max 10MB</label>
     <div class="row" id="avatarRow"><select id="avatarId"></select><input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp"><button id="avatarBtn">Pasang pfp</button></div>
+    <div class="upload-progress" id="avatarProgress"><div class="track"><div class="bar" id="avatarProgressBar"></div></div><p class="txt" id="avatarProgressText"></p></div>
     <div class="divider"></div>
     <label>Hapus anggota</label>
     <div id="memberList"></div>
@@ -323,6 +324,7 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:8px 0 0}
   <label>Foto profil — png/jpg/webp, max 10MB</label>
   <input id="myPfpFile" type="file" accept="image/png,image/jpeg,image/webp">
   <button id="saveProfilePfpBtn" style="margin-top:8px">Pasang foto</button>
+  <div class="upload-progress" id="myPfpProgress"><div class="track"><div class="bar" id="myPfpProgressBar"></div></div><p class="txt" id="myPfpProgressText"></p></div>
   <p id="profileMsg" class="muted"></p>
 </div>
 
@@ -492,7 +494,70 @@ async function fetchLive(){
   }catch(e){statusEl.innerHTML='<span class="err">Tidak bisa reach server: '+escapeHtml(e.message)+'</span>';}
   finally{ fetchingLive=false; }
 }
-function readFileAsBase64(file){return new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(file);});}
+function readFileAsBase64(file,onprog){return new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=()=>rej(new Error('Gagal membaca file')); if(onprog) r.onprogress=e=>{ if(e.lengthComputable) onprog(Math.round(e.loaded/e.total*100)); }; r.readAsDataURL(file);});}
+/* ---- upload pfp dengan progress (XHR, karena fetch tidak memberi progress upload) ---- */
+const avatarBusy={admin:false,mine:false};
+let avatarProgressGen=0;
+function setAvatarProgress(boxId,barId,txtId,pct,text){
+  const box=document.getElementById(boxId);
+  box.style.display = pct===null ? 'none' : '';
+  if(pct!==null){
+    document.getElementById(barId).style.width=pct+'%';
+    document.getElementById(txtId).textContent=text||('Meng-upload pfp… '+pct+'%');
+  }
+}
+function postAvatarXhr(id,mime,b64,onProgress){
+  // POST avatar via XHR agar ada upload.onprogress. Resolve selalu (ok=false untuk HTTP error); reject hanya untuk network/timeout.
+  return new Promise((resolve,reject)=>{
+    const x=new XMLHttpRequest();
+    x.open('POST',base+'/api/admin/participants/'+encodeURIComponent(id)+'/avatar');
+    x.setRequestHeader('X-API-Key',apiKey);
+    x.setRequestHeader('Content-Type','application/json');
+    x.timeout=120000;
+    x.upload.onprogress=e=>{ if(e.lengthComputable && onProgress) onProgress(Math.round(e.loaded/e.total*100)); };
+    x.onload=()=>{ let j={}; try{j=JSON.parse(x.responseText);}catch(_){}
+      resolve({ok:x.status>=200&&x.status<300, status:x.status, json:j}); };
+    x.onerror=()=>reject(new Error('network error — periksa koneksi'));
+    x.ontimeout=()=>reject(new Error('upload timeout — koneksi terlalu lambat'));
+    x.send(JSON.stringify({mime:mime,data_base64:b64}));
+  });
+}
+async function runAvatarUpload(o){
+  // o: {flagKey, id, file, btnId, inputId, boxId, barId, txtId, msgId, okText, afterOk}
+  // Selama upload: tombol + input disabled (CSS :disabled membuatnya pudar) sehingga tidak bisa double-tap.
+  // Progress tampil sejak tap pertama: "Menyiapkan file…" saat baca file, "Meng-upload pfp… N%" saat kirim.
+  if(avatarBusy[o.flagKey]) return false;
+  avatarBusy[o.flagKey]=true;
+  const myGen=++avatarProgressGen;
+  const btn=document.getElementById(o.btnId), input=document.getElementById(o.inputId);
+  btn.disabled=true; input.disabled=true;
+  const setP=(pct,text)=>setAvatarProgress(o.boxId,o.barId,o.txtId,pct,text);
+  const hideSoon=()=>{ setTimeout(()=>{ if(myGen===avatarProgressGen) setP(null); },1200); };
+  try{
+    setP(0,'Menyiapkan file…');
+    const b64=await readFileAsBase64(o.file,pct=>setP(pct,'Menyiapkan file… '+pct+'%'));
+    setP(0,'Meng-upload pfp… 0%');
+    const res=await postAvatarXhr(o.id,o.file.type,b64,pct=>setP(pct,'Meng-upload pfp… '+pct+'%'));
+    if(!res.ok){
+      document.getElementById(o.msgId).textContent='Gagal: '+((res.json&&res.json.error)||('HTTP '+res.status));
+      setP(null); return false;
+    }
+    setP(100,'Selesai ✓');
+    input.value='';
+    // afterOk dulu (mis. fillProfileSheet() menulis ulang pesan) — baru tulis pesan sukses, supaya tidak ketimpa.
+    if(o.afterOk) await o.afterOk(res.json);
+    document.getElementById(o.msgId).textContent=o.okText(res.json);
+    hideSoon();
+    return true;
+  }catch(e){
+    document.getElementById(o.msgId).textContent='Gagal: '+(e.message||e);
+    setP(null);
+    return false;
+  }finally{
+    btn.disabled=false; input.disabled=false;
+    avatarBusy[o.flagKey]=false;
+  }
+}
 // ---- R2: upload langsung browser -> R2 (file besar), dengan progress bar ----
 function setUploadProgress(pct, text){
   const box=document.getElementById('uploadProgress');
@@ -747,11 +812,9 @@ document.getElementById('saveProfileNameBtn').onclick=async()=>{
 document.getElementById('saveProfilePfpBtn').onclick=async()=>{
   const f=document.getElementById('myPfpFile').files[0]; if(!f){alert('Pilih gambar dulu');return;}
   if(f.size>10*1024*1024){alert('Pfp max 10 MB');return;}
-  const b64=await readFileAsBase64(f);
-  const r=await fetch(base+'/api/admin/participants/'+encodeURIComponent(me.id)+'/avatar',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({mime:f.type,data_base64:b64})});
-  const j=await r.json();
-  if(r.ok){ await loadParticipants(); fillProfileSheet(); }
-  document.getElementById('profileMsg').textContent = r.ok ? 'Foto profil dipasang.' : 'Gagal: '+(j.error||r.status);
+  await runAvatarUpload({flagKey:'mine', id:me.id, file:f, btnId:'saveProfilePfpBtn', inputId:'myPfpFile', boxId:'myPfpProgress', barId:'myPfpProgressBar', txtId:'myPfpProgressText', msgId:'profileMsg', okText:()=>'Foto profil dipasang.', afterOk:async()=>{ await loadParticipants(); fillProfileSheet(); }});
+  // kembalikan aturan disabled sesuai peran (non-owner tidak boleh pakai tombol ini)
+  document.getElementById('saveProfilePfpBtn').disabled = me.role!=='owner';
 };
 /* ---- admin ---- */
 document.getElementById('addUserBtn').onclick=async()=>{
@@ -783,11 +846,7 @@ document.getElementById('renameBtn').onclick=async()=>{
 document.getElementById('avatarBtn').onclick=async()=>{
   const id=document.getElementById('avatarId').value, f=document.getElementById('avatarFile').files[0]; if(!f){alert('Pilih gambar dulu');return;}
   if(f.size>10*1024*1024){alert('Pfp max 10 MB');return;}
-  const b64=await readFileAsBase64(f);
-  const r=await fetch(base+'/api/admin/participants/'+encodeURIComponent(id)+'/avatar',{method:'POST',headers:{'X-API-Key':apiKey,'Content-Type':'application/json'},body:JSON.stringify({mime:f.type,data_base64:b64})});
-  const j=await r.json();
-  document.getElementById('adminMsg').textContent = r.ok ? 'Pfp '+j.participant.name+' dipasang.' : 'Gagal: '+(j.error||r.status);
-  await loadParticipants();
+  await runAvatarUpload({flagKey:'admin', id:id, file:f, btnId:'avatarBtn', inputId:'avatarFile', boxId:'avatarProgress', barId:'avatarProgressBar', txtId:'avatarProgressText', msgId:'adminMsg', okText:j=>'Pfp '+j.participant.name+' dipasang.', afterOk:async()=>{ await loadParticipants(); }});
 };
 /* ---- hapus anggota (owner) ---- */
 let pendingDeleteId=null, pendingDeleteName='';
